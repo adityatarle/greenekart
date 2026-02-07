@@ -38,7 +38,7 @@
                             </div>
                             <div class="stat-divider"></div>
                             <div class="stat-item">
-                                <span class="stat-number">{{ $products->where('in_stock', true)->count() }}</span>
+                                <span class="stat-number">{{ $products->total() }}</span>
                                 <span class="stat-label">In Stock</span>
                             </div>
                         </div>
@@ -123,14 +123,7 @@
     </div>
     
     <!-- Other Categories -->
-    @php
-        $otherCategories = \App\Models\AgricultureCategory::active()
-            ->where('id', '!=', $category->id)
-            ->ordered()
-            ->limit(6)
-            ->get();
-    @endphp
-    @if($otherCategories->count() > 0)
+    @if(isset($otherCategories) && $otherCategories->count() > 0)
     <div class="other-categories">
         <div class="container-fluid px-lg-5">
             <div class="section-header centered">
@@ -147,7 +140,7 @@
                             </svg>
                         </div>
                         <h4 class="card-title">{{ $otherCategory->name }}</h4>
-                        <p class="card-count">{{ $otherCategory->products_count ?? $otherCategory->products->count() }} Products</p>
+                        <p class="card-count">{{ $otherCategory->products_count ?? 0 }} Products</p>
                         <span class="card-arrow">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <line x1="5" y1="12" x2="19" y2="12"></line>

@@ -21,13 +21,29 @@ class AgricultureCategoryController extends Controller
         return view('agriculture.categories.index', compact('categories'));
     }
     
-    public function show(AgricultureCategory $category)
+    public function show(string $category)
     {
+        $categoryModel = AgricultureCategory::where('slug', $category)
+            ->where('is_active', true)
+            ->firstOrFail();
+
         $products = AgricultureProduct::active()
             ->inStock()
-            ->byCategory($category->id)
+            ->byCategory($categoryModel->id)
+            ->with('category')
             ->paginate(12);
-            
-        return view('agriculture.categories.show', compact('category', 'products'));
+
+        $otherCategories = AgricultureCategory::active()
+            ->where('id', '!=', $categoryModel->id)
+            ->ordered()
+            ->withCount('products')
+            ->limit(6)
+            ->get();
+
+        return view('agriculture.categories.show', [
+            'category' => $categoryModel,
+            'products' => $products,
+            'otherCategories' => $otherCategories,
+        ]);
     }
 }

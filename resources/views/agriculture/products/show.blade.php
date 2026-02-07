@@ -13,6 +13,17 @@
         <div class="col-lg-6">
             <div class="product-image-main mb-3">
                 <div class="image-wrapper">
+                    @auth
+                    <form action="{{ route('agriculture.wishlist.add') }}" method="POST" class="wishlist-form-image">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <button type="submit" class="wishlist-btn-image" title="Add to Wishlist">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </button>
+                    </form>
+                    @endauth
                     <img id="mainProductImage" src="{{ $mainImageUrl }}" 
                          alt="{{ $product->name }}" class="img-fluid">
                     @if($product->sale_price)
@@ -77,33 +88,23 @@
                         @endif
                     </div>
                 </div>
-                
-                <div class="product-specs-card mb-3">
-                    @if($product->brand || $product->model)
-                    <div class="specs-grid">
-                        @if($product->brand)
-                        <div class="spec-item">
-                            <span class="spec-label">Brand</span>
-                            <span class="spec-value">{{ $product->brand }}</span>
-                        </div>
-                        @endif
-                        @if($product->model)
-                        <div class="spec-item">
-                            <span class="spec-label">Model</span>
-                            <span class="spec-value">{{ $product->model }}</span>
-                        </div>
-                        @endif
-                    </div>
-                    @endif
-                </div>
-                
-                @if($product->description)
-                <div class="product-description-card mb-3">
-                    <h6 class="section-title">Description</h6>
-                    <p class="description-text">{{ $product->description }}</p>
+
+                @php
+                    $shortDescLines = $product->short_description
+                        ? array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $product->short_description)))
+                        : [];
+                @endphp
+                @if(!empty($shortDescLines))
+                <div class="product-short-description mb-3">
+                    <h6 class="section-title">Short Description</h6>
+                    <ul class="short-description-list">
+                        @foreach($shortDescLines as $line)
+                        <li>{{ $line }}</li>
+                        @endforeach
+                    </ul>
                 </div>
                 @endif
-                
+
                 @php
                     $specifications = $product->specifications ?? [];
                     if (is_string($specifications)) {
@@ -113,20 +114,20 @@
                 @if(!empty($specifications) && is_array($specifications))
                 <div class="product-specifications-card mb-3">
                     <h6 class="section-title">Specifications</h6>
-                    <div class="specifications-table-wrapper">
-                        <table class="specifications-table">
-                            <tbody>
-                                @foreach($specifications as $spec)
-                                @if(!empty($spec['key']) && !empty($spec['value']))
-                                <tr>
-                                    <td class="spec-key-cell">{{ $spec['key'] }}</td>
-                                    <td class="spec-value-cell">{{ $spec['value'] }}</td>
-                                </tr>
-                                @endif
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                    <ul class="specifications-list">
+                        @foreach($specifications as $spec)
+                        @if(!empty($spec['key']))
+                        <li><strong>{{ $spec['key'] }}:</strong> {{ $spec['value'] ?? '' }}</li>
+                        @endif
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
+                @if($product->description)
+                <div class="product-description-card mb-3">
+                    <h6 class="section-title">Description</h6>
+                    <div class="description-text">{!! nl2br(e($product->description)) !!}</div>
                 </div>
                 @endif
                 
@@ -241,6 +242,35 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.wishlist-form-image {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 10;
+}
+
+.wishlist-btn-image {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.95);
+    color: #6c757d;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.25s ease;
+}
+
+.wishlist-btn-image:hover {
+    background: #fff;
+    color: #dc3545;
+    transform: scale(1.08);
+    box-shadow: 0 4px 14px rgba(220, 53, 69, 0.25);
 }
 
 .image-wrapper img {
@@ -374,38 +404,29 @@
     letter-spacing: 0.3px;
 }
 
-/* Specs Card */
-.product-specs-card {
-    background: #f8f9fa;
+/* Short Description */
+.product-short-description {
+    background: #fff;
     border-radius: 10px;
-    padding: 14px;
+    padding: 16px;
     border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-.specs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 12px;
-}
-
-.spec-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.spec-label {
-    font-size: 0.75rem;
-    color: #6c757d;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-}
-
-.spec-value {
+.short-description-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: #495057;
     font-size: 0.9rem;
-    color: #2c3e50;
-    font-weight: 500;
+    line-height: 1.7;
+}
+
+.short-description-list li {
+    margin-bottom: 6px;
+}
+
+.short-description-list li:last-child {
+    margin-bottom: 0;
 }
 
 /* Description Card */
@@ -426,43 +447,26 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-.specifications-table-wrapper {
-    margin-top: 12px;
-}
-
-.specifications-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.specifications-table tbody tr {
-    border-bottom: 1px solid #e9ecef;
-    transition: background-color 0.2s;
-}
-
-.specifications-table tbody tr:last-child {
-    border-bottom: none;
-}
-
-.specifications-table tbody tr:hover {
-    background-color: #f8f9fa;
-}
-
-.spec-key-cell {
-    padding: 10px 12px;
-    font-weight: 600;
+.specifications-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    list-style: disc;
     color: #495057;
-    width: 40%;
-    vertical-align: top;
     font-size: 0.9rem;
+    line-height: 1.75;
 }
 
-.spec-value-cell {
-    padding: 10px 12px;
-    color: #6c757d;
-    width: 60%;
-    vertical-align: top;
-    font-size: 0.9rem;
+.specifications-list li {
+    margin-bottom: 6px;
+}
+
+.specifications-list li:last-child {
+    margin-bottom: 0;
+}
+
+.specifications-list strong {
+    color: #2c3e50;
+    font-weight: 600;
 }
 
 .section-title {
@@ -472,13 +476,23 @@
     margin-bottom: 10px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 8px;
 }
 
 .description-text {
     color: #495057;
     font-size: 0.9rem;
-    line-height: 1.6;
+    line-height: 1.65;
     margin: 0;
+}
+
+.description-text p {
+    margin-bottom: 0.75rem;
+}
+
+.description-text p:last-child {
+    margin-bottom: 0;
 }
 
 /* Add to Cart */

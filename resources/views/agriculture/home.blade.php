@@ -111,7 +111,7 @@
             <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                 <div class="product-card">
                     <div class="product-image">
-                        <img src="{{ $product->featured_image ? asset('storage/' . $product->featured_image) : asset('assets/organic/images/product-thumb-1.png') }}" alt="{{ $product->name }}" class="img-fluid">
+                        <img src="{{ \App\Helpers\ImageHelper::productImageUrl($product) }}" alt="{{ $product->name }}" class="img-fluid">
                         @if($product->sale_price)
                         <span class="badge bg-danger position-absolute top-0 end-0 m-2">Sale</span>
                         @endif

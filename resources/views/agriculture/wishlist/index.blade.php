@@ -57,7 +57,7 @@
                         $salePrice = $isDealer ? ($product->dealer_sale_price ?? null) : ($product->sale_price ?? null);
                         $current = $salePrice ?: $originalPrice;
                         $discount = ($salePrice && $originalPrice && $salePrice < $originalPrice) ? round((($originalPrice - $salePrice) / $originalPrice) * 100) : 0;
-                        $imageUrl = $product->featured_image ? asset('storage/' . $product->featured_image) : asset('assets/organic/images/product-thumb-1.png');
+                        $imageUrl = \App\Helpers\ImageHelper::productImageUrl($product);
                     @endphp
                     <div class="wishlist-item">
                         <div class="wishlist-card">

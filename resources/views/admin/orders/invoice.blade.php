@@ -157,8 +157,15 @@
     <div class="container">
         <div class="header">
             <div class="header-left">
-                <div class="brand">GREENLEAF</div>
-                <div class="muted">Agricultural Equipment & Supplies</div>
+                <div style="display: table;">
+                    <div style="display: table-cell; vertical-align: middle; padding-right: 10px;">
+                        <img src="{{ public_path('assets/logo/logo.png') }}" alt="Greenleaf" style="height: 44px;">
+                    </div>
+                    <div style="display: table-cell; vertical-align: middle;">
+                        <div class="brand">GREENLEAF</div>
+                        <div class="muted">Agricultural Equipment & Supplies</div>
+                    </div>
+                </div>
             </div>
             <div class="header-right">
                 <p class="title">ORDER</p>

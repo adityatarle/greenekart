@@ -320,6 +320,10 @@ class OrderController extends Controller
     private function transformOrder($order)
     {
         $isInquiry = $order->order_status === 'inquiry';
+        $storeName = config('app.name', 'Greenleaf');
+        $storeTagline = 'Agricultural Equipment & Supplies';
+        // Use the same logo everywhere (header/footer/PDF/API)
+        $storeLogo = $this->ensureAbsoluteUrl(asset('assets/logo/logo.png'));
         
         return [
             'order_number' => $order->order_number,
@@ -337,6 +341,11 @@ class OrderController extends Controller
             'order_status' => $order->order_status,
             'is_inquiry' => $isInquiry, // Helper flag for mobile apps
             'notes' => $order->notes,
+            'store' => [
+                'name' => $storeName,
+                'tagline' => $storeTagline,
+                'logo' => $storeLogo,
+            ],
             'items' => $order->items->map(function ($item) use ($order) {
                 // Use ImageHelper for consistent image URLs
                 $imageUrl = null;

@@ -35,10 +35,16 @@ Route::prefix('v1')->group(function () {
         ]);
     });
     
-    // Authentication Routes
+    // Authentication Routes (password)
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+
+    // Authentication Routes (WhatsApp OTP for mobile app)
+    Route::post('/auth/otp/login/start', [AuthController::class, 'startLoginOtp']);
+    Route::post('/auth/otp/login/verify', [AuthController::class, 'verifyLoginOtp']);
+    Route::post('/auth/otp/register/start', [AuthController::class, 'startRegisterOtp']);
+    Route::post('/auth/otp/register/verify', [AuthController::class, 'verifyRegisterOtp']);
     
     // Public Product Routes (with optional authentication for dealer pricing)
     // These routes are public but will authenticate user if token is provided

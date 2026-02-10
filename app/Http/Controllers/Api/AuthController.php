@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Notification;
+use App\Services\WhatsAppOtpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -14,11 +15,19 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    protected WhatsAppOtpService $otpService;
+
+    public function __construct(WhatsAppOtpService $otpService)
+    {
+        $this->otpService = $otpService;
+    }
+
     /**
      * Register a new user
      */
     public function register(Request $request)
     {
+        // Keep existing direct registration for now (without OTP) for backward compatibility
         try {
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string|max:255',
@@ -175,6 +184,153 @@ class AuthController extends Controller
     }
 
     /**
+     * Start login with WhatsApp OTP (step 1)
+     * - Validates credentials
+     * - Sends OTP via WhatsApp
+     * - Returns an otp_token that the app must use in verify step
+     */
+    public function startLoginOtp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required_without:phone|email',
+            'phone' => 'required_without:email|string',
+            'password' => 'required|string',
+        ], [
+            'email.required_without' => 'Either email or phone number is required.',
+            'phone.required_without' => 'Either email or phone number is required.',
+            'email.email' => 'Please provide a valid email address.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Find user by email or phone
+        $user = null;
+        if ($request->filled('email')) {
+            $user = User::where('email', $request->email)->first();
+        } elseif ($request->filled('phone')) {
+            $user = User::where('phone', $request->phone)->first();
+        }
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid credentials'
+            ], 401);
+        }
+
+        if (empty($user->phone)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No phone number on file. Please contact support to add a phone for OTP login.'
+            ], 400);
+        }
+
+        // Rate limit by phone (same as web flow)
+        $digits = preg_replace('/\D/', '', $user->phone);
+        $rateKey = 'otp_sent:' . $digits;
+        if (\Cache::has($rateKey)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please wait a minute before requesting another OTP.'
+            ], 429);
+        }
+
+        $result = $this->otpService->sendOtp($user->phone);
+        if (!$result['success']) {
+            return response()->json([
+                'success' => false,
+                'message' => $result['message'] ?? 'Failed to send OTP. Please try again.'
+            ], 500);
+        }
+
+        \Cache::put($rateKey, true, now()->addMinute());
+
+        // Store minimal state against a random otp_token (so mobile is stateless)
+        $otpToken = bin2hex(random_bytes(16));
+        $tokenKey = 'api_login_otp:' . $otpToken;
+        $ttlMinutes = (int) config('otp.expiry_minutes', 10);
+
+        \Cache::put($tokenKey, [
+            'user_id' => $user->id,
+            'phone' => $user->phone,
+        ], now()->addMinutes($ttlMinutes));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'OTP sent to your WhatsApp. Please verify to complete login.',
+            'data' => [
+                'otp_token' => $otpToken,
+                'expires_in_minutes' => $ttlMinutes,
+            ],
+        ]);
+    }
+
+    /**
+     * Verify login OTP (step 2) and issue Sanctum token
+     */
+    public function verifyLoginOtp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'otp_token' => 'required|string',
+            'otp' => 'required|string|size:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $tokenKey = 'api_login_otp:' . $request->otp_token;
+        $data = \Cache::get($tokenKey);
+
+        if (!$data || empty($data['user_id']) || empty($data['phone'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired OTP session. Please login again.'
+            ], 400);
+        }
+
+        $phone = $data['phone'];
+        if (!$this->otpService->verify($phone, $request->otp)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired OTP. Please try again.'
+            ], 422);
+        }
+
+        \Cache::forget($tokenKey);
+
+        $user = User::find($data['user_id']);
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found. Please login again.'
+            ], 404);
+        }
+
+        $token = $user->createToken('mobile-app')->plainTextToken;
+        $userData = $user->makeHidden(['password', 'remember_token'])->toArray();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Login successful',
+            'data' => [
+                'user' => $userData,
+                'token' => $token,
+            ]
+        ]);
+    }
+
+    /**
      * Logout user
      */
     public function logout(Request $request)
@@ -273,5 +429,136 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'Password reset link sent to your email'
         ]);
+    }
+
+    /**
+     * Start registration with WhatsApp OTP (step 1)
+     * Validates data and sends OTP, returns otp_token
+     */
+    public function startRegisterOtp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => ['required', Password::defaults()],
+            'role' => 'required|in:customer,dealer',
+            'phone' => 'required|string|max:20',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Rate limit by phone
+        $digits = preg_replace('/\D/', '', $request->phone);
+        $rateKey = 'otp_sent:' . $digits;
+        if (\Cache::has($rateKey)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please wait a minute before requesting another OTP.'
+            ], 429);
+        }
+
+        $result = $this->otpService->sendOtp($request->phone);
+        if (!$result['success']) {
+            return response()->json([
+                'success' => false,
+                'message' => $result['message'] ?? 'Failed to send OTP. Please try again.'
+            ], 500);
+        }
+
+        \Cache::put($rateKey, true, now()->addMinute());
+
+        $otpToken = bin2hex(random_bytes(16));
+        $tokenKey = 'api_register_otp:' . $otpToken;
+        $ttlMinutes = (int) config('otp.expiry_minutes', 10);
+
+        \Cache::put($tokenKey, [
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => $request->password,
+            'role' => $request->role,
+            'phone' => $request->phone,
+        ], now()->addMinutes($ttlMinutes));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'OTP sent to your WhatsApp. Please verify to complete registration.',
+            'data' => [
+                'otp_token' => $otpToken,
+                'expires_in_minutes' => $ttlMinutes,
+            ],
+        ]);
+    }
+
+    /**
+     * Verify registration OTP (step 2) and create user
+     */
+    public function verifyRegisterOtp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'otp_token' => 'required|string',
+            'otp' => 'required|string|size:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $tokenKey = 'api_register_otp:' . $request->otp_token;
+        $data = \Cache::get($tokenKey);
+
+        if (!$data || empty($data['phone']) || empty($data['email'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired OTP session. Please register again.'
+            ], 400);
+        }
+
+        if (!$this->otpService->verify($data['phone'], $request->otp)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired OTP. Please try again.'
+            ], 422);
+        }
+
+        \Cache::forget($tokenKey);
+
+        // Create user (similar to normal register)
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+            'viewable_password' => $data['password'],
+            'role' => $data['role'],
+            'phone' => $data['phone'],
+        ]);
+
+        Notification::create([
+            'user_id' => $user->id,
+            'title' => 'Welcome!',
+            'message' => 'Thank you for registering with us!',
+            'type' => 'info',
+        ]);
+
+        $token = $user->createToken('mobile-app')->plainTextToken;
+        $userData = $user->makeHidden(['password', 'remember_token'])->toArray();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Registration successful',
+            'data' => [
+                'user' => $userData,
+                'token' => $token,
+            ]
+        ], 201);
     }
 }

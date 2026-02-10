@@ -1,60 +1,303 @@
-# Flutter API Integration Guide - Nexus Agriculture
+# Greenleaf API Guide for Flutter Developers
+
+Complete A–Z reference for the Greenleaf mobile API: customer login (password + **OTP**), registration (with **OTP verification**), products, cart, wishlist, orders, profile, offers, and dealer flows.
+
+---
 
 ## Table of Contents
-1. [Overview](#overview)
-2. [Authentication](#authentication)
-3. [Order/Inquiry Workflow](#orderinquiry-workflow)
-4. [API Endpoints](#api-endpoints)
-5. [Request/Response Formats](#requestresponse-formats)
-6. [Status Codes](#status-codes)
-7. [Error Handling](#error-handling)
-8. [Image Handling](#image-handling)
-9. [Complete Workflow Example](#complete-workflow-example)
-10. [Best Practices](#best-practices)
+
+1. [Base URL & Headers](#1-base-url--headers)
+2. [Authentication](#2-authentication)
+   - [Password Login](#21-password-login)
+   - [OTP Login (WhatsApp)](#22-otp-login-whatsapp)
+   - [Password Registration](#23-password-registration)
+   - [OTP Registration (WhatsApp)](#24-otp-registration-whatsapp)
+   - [Logout](#25-logout)
+   - [Get Current User](#26-get-current-user)
+   - [Forgot Password](#27-forgot-password)
+3. [Profile](#3-profile)
+4. [Categories & Subcategories](#4-categories--subcategories)
+5. [Products](#5-products)
+6. [Cart](#6-cart)
+7. [Wishlist](#7-wishlist)
+8. [Orders](#8-orders)
+9. [Offers](#9-offers)
+10. [Notifications](#10-notifications)
+11. [Dealer](#11-dealer)
+12. [Flutter Integration Tips](#12-flutter-integration-tips)
+13. [Error Handling](#13-error-handling)
 
 ---
 
-## Overview
+## 1. Base URL & Headers
 
-The Nexus Agriculture API uses an **inquiry-based order system**. This means:
+- **Base URL:** `https://your-domain.com/api/v1` (replace with your `APP_URL` + `/api/v1`).
+- **Content-Type:** `application/json`
+- **Accept:** `application/json`
 
-- **No payment integration required** - Orders are created as inquiries
-- **Admin follow-up** - Admin will contact customers to confirm order details
-- **Status tracking** - Orders can be tracked through various statuses
-- **Stock management** - Stock is NOT reduced until admin confirms the order
+For **protected routes**, send the Bearer token:
 
-### Key Concepts
-
-- **Inquiry**: Initial order submission (no payment required)
-- **Order Status**: `inquiry`, `pending`, `processing`, `shipped`, `delivered`, `cancelled`
-- **Payment Status**: `not_required` (for inquiries), `pending`, `paid`, `failed`, `refunded`
-
----
-
-## Authentication
-
-All API endpoints require authentication using **Bearer Token**.
-
-### Headers Required
 ```
-Authorization: Bearer {access_token}
-Accept: application/json
-Content-Type: application/json
+Authorization: Bearer <your_sanctum_token>
 ```
 
-### Getting Access Token
+**Health check (no auth):**
 
-**Endpoint**: `POST /api/v1/login`
+```http
+GET /api/v1/test
+```
 
-**Request**:
+**Response:**
+
 ```json
 {
-  "email": "customer@example.com",
-  "password": "password123"
+  "success": true,
+  "message": "API is accessible",
+  "timestamp": "2025-02-10T12:00:00.000000Z",
+  "server": "Apache/2.4.x"
 }
 ```
 
-**Response**:
+---
+
+## 2. Authentication
+
+### 2.1 Password Login
+
+Login with email **or** phone + password.
+
+**Endpoint:** `POST /api/v1/login`
+
+**Body (email):**
+
+```json
+{
+  "email": "customer@example.com",
+  "password": "YourPassword123"
+}
+```
+
+**Body (phone):**
+
+```json
+{
+  "phone": "9876543210",
+  "password": "YourPassword123"
+}
+```
+
+**Success (200):**
+
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "user": {
+      "id": 1,
+      "name": "John Doe",
+      "email": "customer@example.com",
+      "phone": "9876543210",
+      "role": "customer",
+      "email_verified_at": null,
+      "created_at": "2025-01-01T00:00:00.000000Z",
+      "updated_at": "2025-01-01T00:00:00.000000Z"
+    },
+    "token": "1|abc123..."
+  }
+}
+```
+
+**Errors:** `401` Invalid credentials, `422` Validation failed.
+
+---
+
+### 2.2 OTP Login (WhatsApp)
+
+Two-step flow: **start** (sends OTP via WhatsApp) → **verify** (returns user + token).
+
+#### Step 1: Start OTP login
+
+**Endpoint:** `POST /api/v1/auth/otp/login/start`
+
+**Body (email or phone + password):**
+
+```json
+{
+  "email": "customer@example.com",
+  "password": "YourPassword123"
+}
+```
+
+or
+
+```json
+{
+  "phone": "9876543210",
+  "password": "YourPassword123"
+}
+```
+
+**Success (200):**
+
+```json
+{
+  "success": true,
+  "message": "OTP sent to your WhatsApp. Please verify to complete login.",
+  "data": {
+    "otp_token": "a1b2c3d4e5f6...",
+    "expires_in_minutes": 10
+  }
+}
+```
+
+- Store `otp_token` and pass it in the verify step.
+- OTP is sent to the user’s **phone** (WhatsApp). User must have `phone` on account.
+
+**Errors:** `401` Invalid credentials, `400` No phone on file, `429` Rate limit (wait 1 minute), `422` Validation.
+
+#### Step 2: Verify OTP and get token
+
+**Endpoint:** `POST /api/v1/auth/otp/login/verify`
+
+**Body:**
+
+```json
+{
+  "otp_token": "a1b2c3d4e5f6...",
+  "otp": "123456"
+}
+```
+
+**Success (200):**
+
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "user": { "id": 1, "name": "John Doe", "email": "...", "phone": "...", "role": "customer", ... },
+    "token": "2|xyz789..."
+  }
+}
+```
+
+**Errors:** `400` Invalid/expired OTP session, `422` Invalid or expired OTP.
+
+---
+
+### 2.3 Password Registration
+
+Register without OTP (optional; OTP registration recommended for mobile).
+
+**Endpoint:** `POST /api/v1/register`
+
+**Body:**
+
+```json
+{
+  "name": "John Doe",
+  "email": "customer@example.com",
+  "password": "YourPassword123",
+  "password_confirmation": "YourPassword123",
+  "role": "customer",
+  "phone": "9876543210"
+}
+```
+
+**Success (201):** Same shape as login (`user` + `token`).  
+**Errors:** `422` Validation (e.g. email already exists).
+
+---
+
+### 2.4 OTP Registration (WhatsApp)
+
+Two-step flow: **start** (validate + send OTP) → **verify** (create user + return token).
+
+#### Step 1: Start OTP registration
+
+**Endpoint:** `POST /api/v1/auth/otp/register/start`
+
+**Body:**
+
+```json
+{
+  "name": "John Doe",
+  "email": "newuser@example.com",
+  "password": "YourPassword123",
+  "role": "customer",
+  "phone": "9876543210"
+}
+```
+
+**Success (200):**
+
+```json
+{
+  "success": true,
+  "message": "OTP sent to your WhatsApp. Please verify to complete registration.",
+  "data": {
+    "otp_token": "f6e5d4c3b2a1...",
+    "expires_in_minutes": 10
+  }
+}
+```
+
+**Errors:** `422` Validation, `429` Rate limit.
+
+#### Step 2: Verify OTP and create account
+
+**Endpoint:** `POST /api/v1/auth/otp/register/verify`
+
+**Body:**
+
+```json
+{
+  "otp_token": "f6e5d4c3b2a1...",
+  "otp": "123456"
+}
+```
+
+**Success (201):**
+
+```json
+{
+  "success": true,
+  "message": "Registration successful",
+  "data": {
+    "user": { "id": 2, "name": "John Doe", "email": "...", "phone": "...", "role": "customer", ... },
+    "token": "3|def456..."
+  }
+}
+```
+
+**Errors:** `400` Invalid/expired OTP session, `422` Invalid or expired OTP.
+
+---
+
+### 2.5 Logout
+
+**Endpoint:** `POST /api/v1/logout`  
+**Auth:** Required (Bearer token)
+
+**Success (200):**
+
+```json
+{
+  "success": true,
+  "message": "Logged out successfully"
+}
+```
+
+---
+
+### 2.6 Get Current User
+
+**Endpoint:** `GET /api/v1/user`  
+**Auth:** Required
+
+**Success (200):**
+
 ```json
 {
   "success": true,
@@ -63,1401 +306,363 @@ Content-Type: application/json
       "id": 1,
       "name": "John Doe",
       "email": "customer@example.com",
-      "role": "customer"
-    },
-    "token": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+      "phone": "9876543210",
+      "role": "customer",
+      "is_dealer": false,
+      "is_approved_dealer": false,
+      "can_access_dealer_pricing": false,
+      "dealer_registration": null,
+      ...
+    }
   }
 }
 ```
 
-**Store the token** and include it in all subsequent requests.
+For dealers, `user` may include `dealer_registration`, `business_name`, `gst_number`, etc.
 
 ---
 
-## Order/Inquiry Workflow
+### 2.7 Forgot Password
 
-### Complete Flow
+**Endpoint:** `POST /api/v1/forgot-password`
 
-1. **Browse Products** → Get product list
-2. **Add to Cart** → Add products to cart
-3. **View Cart** → Review cart items
-4. **Create Inquiry** → Submit order as inquiry
-5. **View Orders** → Check order status
-6. **Order Details** → View full order information
+**Body:**
 
-### Status Flow
-
+```json
+{
+  "email": "customer@example.com"
+}
 ```
-inquiry → pending → processing → shipped → delivered
-                ↓
-            cancelled
+
+**Success (200):** `{ "success": true, "message": "Password reset link sent to your email" }`  
+**Note:** Backend may still be TODO; check with server team.
+
+---
+
+## 3. Profile
+
+**Auth:** Required for all profile endpoints.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/profile` | Get profile |
+| PUT | `/api/v1/profile` | Update profile |
+| POST | `/api/v1/profile/change-password` | Change password |
+
+**GET /api/v1/profile** – Response includes `data.user` (name, email, phone, dealer fields if applicable).
+
+**PUT /api/v1/profile** – Body (all optional): `name`, `email`, `phone`. Response: `data.user` updated.
+
+**POST /api/v1/profile/change-password** – Body:
+
+```json
+{
+  "current_password": "OldPass123",
+  "password": "NewPass123",
+  "password_confirmation": "NewPass123"
+}
 ```
 
 ---
 
-## API Endpoints
+## 4. Categories & Subcategories
 
-### Base URL
-```
-https://your-domain.com/api/v1
-```
+All public (no auth required). Optional: send Bearer token for dealer pricing on products.
 
-**Note**: All endpoints use the `/api/v1` prefix.
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/categories` | List categories with subcategories |
+| GET | `/api/v1/categories/{id}` | Single category (with products if applicable) |
+| GET | `/api/v1/subcategories` | List subcategories |
+| GET | `/api/v1/subcategories/{id}` | Single subcategory |
 
-### 1. Get Products
+**GET /api/v1/categories** – Each item: `id`, `name`, `slug`, `description`, `image` (full URL), `products_count`, `subcategories` (array of `id`, `name`, `slug`, `description`, `image`).
 
-**Endpoint**: `GET /api/v1/products`
+---
 
-**Query Parameters**:
-- `category_id` (optional): Filter by category
-- `subcategory_id` (optional): Filter by subcategory
-- `search` (optional): Search products
-- `brand` (optional): Filter by brand
-- `power_source` (optional): Filter by power source
-- `min_price` (optional): Minimum price filter
-- `max_price` (optional): Maximum price filter
-- `featured` (optional): Filter featured products (true/false)
-- `sort` (optional): Sort by (`name`, `price_low`, `price_high`, `newest`)
-- `per_page` (optional): Items per page (default: 15)
-- `page` (optional): Page number
+## 5. Products
 
-**Response**:
+Public; optional auth for dealer pricing.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/products` | List with filters & pagination |
+| GET | `/api/v1/products/search?q=...` | Search (min 2 chars) |
+| GET | `/api/v1/products/featured` | Featured products |
+| GET | `/api/v1/products/{id}` or `/{slug}` | Single product + related |
+
+**Query params for GET /api/v1/products:**
+
+- `category_id`, `subcategory_id`, `brand`, `power_source`
+- `min_price`, `max_price`
+- `featured` (bool)
+- `sort`: `name` \| `price_low` \| `price_high` \| `newest`
+- `per_page` (default 15), `page`
+
+**Product object (in list/detail):**
+
+- `id`, `name`, `slug`, `description`, `short_description`, `sku`
+- `price`, `original_price`, `sale_price`, `dealer_price`, `dealer_sale_price` (if dealer), `discount_percentage`
+- `stock_quantity`, `in_stock`, `is_featured`
+- `image` (main, full URL), `images` (gallery, full URLs)
+- `brand`, `model`, `power_source`, `warranty`, `weight`, `dimensions`
+- `category`: `{ id, name, slug }`
+- `subcategory`: `{ id, name, slug }` or null
+- `created_at`, `updated_at` (ISO)
+
+Single product response also includes `related_products` (array of same shape).
+
+---
+
+## 6. Cart
+
+**Auth:** Required. Uses session for cart; ensure session is enabled for API (backend uses `StartSession` for cart routes).
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/cart` | Get cart |
+| POST | `/api/v1/cart/add` | Add item |
+| PUT | `/api/v1/cart/update` | Update quantity |
+| DELETE | `/api/v1/cart/remove/{productId}` | Remove item |
+| DELETE | `/api/v1/cart/clear` | Clear cart |
+| GET | `/api/v1/cart/count` | Cart item count |
+
+**POST /api/v1/cart/add:**
+
 ```json
 {
-  "success": true,
-  "data": {
-    "current_page": 1,
-    "data": [
-      {
-        "id": 1,
-        "name": "Tractor Model X",
-        "slug": "tractor-model-x",
-        "sku": "TRC-001",
-        "description": "High-quality agricultural tractor",
-        "short_description": "Powerful farming equipment",
-        "price": 50000.00,
-        "original_price": 50000.00,
-        "sale_price": null,
-        "dealer_price": 45000.00,
-        "dealer_sale_price": null,
-        "discount_percentage": 0,
-        "stock_quantity": 10,
-        "in_stock": true,
-        "is_featured": false,
-        "image": "https://your-domain.com/storage/products/primary/tractor.jpg?v=1234567890",
-        "images": [
-          "https://your-domain.com/storage/products/gallery/tractor-1.jpg?v=1234567890"
-        ],
-        "brand": "John Deere",
-        "model": "Model X",
-        "power_source": "Diesel",
-        "warranty": "2 Years",
-        "weight": 1500.50,
-        "dimensions": "200x100x150",
-        "category": {
-          "id": 1,
-          "name": "Tractors",
-          "slug": "tractors"
-        },
-        "subcategory": {
-          "id": 1,
-          "name": "Heavy Duty Tractors",
-          "slug": "tractors-heavy-duty-tractors"
-        },
-        "created_at": "2025-11-08T10:00:00.000000Z",
-        "updated_at": "2025-11-08T10:00:00.000000Z"
-      }
-    ],
-    "total": 50,
-    "per_page": 15
-  }
-}
-```
-
-### 2. Get Categories
-
-**Endpoint**: `GET /api/v1/categories`
-
-**Response**:
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": 1,
-      "name": "Tractors",
-      "slug": "tractors",
-      "description": "Agricultural tractors and equipment",
-      "image": "https://your-domain.com/storage/categories/tractors.jpg",
-      "products_count": 25,
-      "subcategories": [
-        {
-          "id": 1,
-          "name": "Heavy Duty Tractors",
-          "slug": "tractors-heavy-duty-tractors",
-          "description": "Heavy duty agricultural tractors",
-          "image": "https://your-domain.com/storage/subcategories/heavy-duty.jpg"
-        },
-        {
-          "id": 2,
-          "name": "Compact Tractors",
-          "slug": "tractors-compact-tractors",
-          "description": "Compact tractors for small farms",
-          "image": null
-        }
-      ]
-    }
-  ]
-}
-```
-
-### 3. Get Single Category with Products
-
-**Endpoint**: `GET /api/v1/categories/{categorySlug}`
-
-**Query Parameters**:
-- `sort` (optional): Sort by (`name`, `price_low`, `price_high`, `newest`)
-- `per_page` (optional): Items per page (default: 15)
-- `page` (optional): Page number
-
-**Response**:
-```json
-{
-  "success": true,
-  "data": {
-    "category": {
-      "id": 1,
-      "name": "Tractors",
-      "slug": "tractors",
-      "description": "Agricultural tractors",
-      "image": "https://your-domain.com/storage/categories/tractors.jpg"
-    },
-    "products": {
-      "current_page": 1,
-      "data": [
-        {
-          "id": 1,
-          "name": "Tractor Model X",
-          "price": 50000.00,
-          "image": "https://your-domain.com/storage/products/primary/tractor.jpg",
-          "category": {
-            "id": 1,
-            "name": "Tractors"
-          },
-          "subcategory": {
-            "id": 1,
-            "name": "Heavy Duty Tractors"
-          }
-        }
-      ]
-    }
-  }
-}
-```
-
-### 4. Get Subcategories
-
-**Endpoint**: `GET /api/v1/subcategories`
-
-**Query Parameters**:
-- `category_id` (optional): Filter subcategories by category
-
-**Response**:
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": 1,
-      "name": "Heavy Duty Tractors",
-      "slug": "tractors-heavy-duty-tractors",
-      "description": "Heavy duty agricultural tractors",
-      "image": "https://your-domain.com/storage/subcategories/heavy-duty.jpg",
-      "category_id": 1,
-      "category": {
-        "id": 1,
-        "name": "Tractors",
-        "slug": "tractors"
-      },
-      "products_count": 15
-    }
-  ]
-}
-```
-
-### 5. Get Single Subcategory with Products
-
-**Endpoint**: `GET /api/v1/subcategories/{subcategorySlug}`
-
-**Query Parameters**:
-- `sort` (optional): Sort by (`name`, `price_low`, `price_high`, `newest`)
-- `per_page` (optional): Items per page (default: 15)
-- `page` (optional): Page number
-
-**Response**:
-```json
-{
-  "success": true,
-  "data": {
-    "subcategory": {
-      "id": 1,
-      "name": "Heavy Duty Tractors",
-      "slug": "tractors-heavy-duty-tractors",
-      "description": "Heavy duty agricultural tractors",
-      "image": "https://your-domain.com/storage/subcategories/heavy-duty.jpg",
-      "category_id": 1,
-      "category": {
-        "id": 1,
-        "name": "Tractors",
-        "slug": "tractors"
-      }
-    },
-    "products": {
-      "current_page": 1,
-      "data": [
-        {
-          "id": 1,
-          "name": "Tractor Model X",
-          "price": 50000.00,
-          "image": "https://your-domain.com/storage/products/primary/tractor.jpg",
-          "category": {
-            "id": 1,
-            "name": "Tractors"
-          },
-          "subcategory": {
-            "id": 1,
-            "name": "Heavy Duty Tractors"
-          }
-        }
-      ]
-    }
-  }
-}
-```
-
-### 6. Search Products
-
-**Endpoint**: `GET /api/v1/products/search`
-
-**Query Parameters**:
-- `q` (required): Search query (minimum 2 characters)
-- `per_page` (optional): Items per page (default: 15)
-- `page` (optional): Page number
-
-**Response**: Same format as Get Products endpoint.
-
-### 7. Get Featured Products
-
-**Endpoint**: `GET /api/v1/products/featured`
-
-**Query Parameters**:
-- `limit` (optional): Number of products (default: 10)
-
-**Response**: Array of products (same format as Get Products).
-
-### 8. Get Single Product
-
-**Endpoint**: `GET /api/v1/products/{productSlug}`
-
-**Response**:
-```json
-{
-  "success": true,
-  "data": {
-    "id": 1,
-    "name": "Tractor Model X",
-    "slug": "tractor-model-x",
-    "description": "High-quality agricultural tractor with advanced features",
-    "short_description": "Powerful farming equipment",
-    "sku": "TRC-001",
-    "price": 50000.00,
-    "original_price": 50000.00,
-    "sale_price": null,
-    "dealer_price": 45000.00,
-    "dealer_sale_price": null,
-    "discount_percentage": 0,
-    "stock_quantity": 10,
-    "in_stock": true,
-    "is_featured": false,
-    "image": "https://your-domain.com/storage/products/primary/tractor.jpg?v=1234567890",
-    "images": [
-      "https://your-domain.com/storage/products/gallery/tractor-1.jpg?v=1234567890",
-      "https://your-domain.com/storage/products/gallery/tractor-2.jpg?v=1234567890"
-    ],
-    "brand": "John Deere",
-    "model": "Model X",
-    "power_source": "Diesel",
-    "warranty": "2 Years",
-    "weight": 1500.50,
-    "dimensions": "200x100x150",
-    "category": {
-      "id": 1,
-      "name": "Tractors",
-      "slug": "tractors"
-    },
-    "subcategory": {
-      "id": 1,
-      "name": "Heavy Duty Tractors",
-      "slug": "tractors-heavy-duty-tractors"
-    },
-    "related_products": [
-      {
-        "id": 2,
-        "name": "Tractor Model Y",
-        "price": 55000.00,
-        "image": "https://your-domain.com/storage/products/primary/tractor-y.jpg"
-      }
-    ],
-    "created_at": "2025-11-08T10:00:00.000000Z",
-    "updated_at": "2025-11-08T10:00:00.000000Z"
-  }
-}
-```
-
-### 9. Add to Cart
-
-**Endpoint**: `POST /api/v1/cart/add`
-
-**Request**:
-```json
-{
-  "product_id": 1,
+  "product_id": 5,
   "quantity": 2
 }
 ```
 
-**Response**:
+**PUT /api/v1/cart/update:**
+
 ```json
 {
-  "success": true,
-  "message": "Product added to cart",
-  "data": {
-    "cart_id": 1,
-    "items": [
-      {
-        "product_id": 1,
-        "product_name": "Tractor Model X",
-        "quantity": 2,
-        "price": 50000.00,
-        "total": 100000.00,
-        "image": "https://your-domain.com/storage/products/primary/tractor.jpg?v=1234567890"
-      }
-    ],
-    "subtotal": 100000.00,
-    "total": 100000.00
-  }
+  "product_id": 5,
+  "quantity": 3
 }
 ```
 
-### 10. Get Cart
+**GET /api/v1/cart** response:
 
-**Endpoint**: `GET /api/v1/cart`
-
-**Response**:
 ```json
 {
   "success": true,
   "data": {
     "items": [
       {
-        "product_id": 1,
-        "product_name": "Tractor Model X",
+        "product_id": 5,
+        "name": "Product Name",
+        "sku": "SKU-001",
+        "price": 999.00,
         "quantity": 2,
-        "price": 50000.00,
-        "total": 100000.00,
-        "image": "https://your-domain.com/storage/products/primary/tractor.jpg?v=1234567890"
+        "subtotal": 1998.00,
+        "image": "https://...",
+        "in_stock": true,
+        "stock_quantity": 10
       }
     ],
-    "subtotal": 100000.00,
-    "tax": 8000.00,
-    "shipping": 25.00,
-    "total": 108025.00
+    "subtotal": 1998.00,
+    "tax_amount": 159.84,
+    "shipping_amount": 25,
+    "total": 2182.84,
+    "items_count": 1
   }
 }
 ```
 
-### 11. Create Order (Inquiry)
+---
 
-**Endpoint**: `POST /api/v1/orders`
+## 7. Wishlist
 
-**Important**: This creates an **inquiry**, not a paid order. No payment is required.
+**Auth:** Required.
 
-**Request**:
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/wishlist` | List wishlist (product objects) |
+| POST | `/api/v1/wishlist/add` | Add product |
+| DELETE | `/api/v1/wishlist/remove/{productId}` | Remove |
+| DELETE | `/api/v1/wishlist/clear` | Clear |
+| GET | `/api/v1/wishlist/check/{productId}` | Check if in wishlist |
+
+**POST /api/v1/wishlist/add:** Body `{ "product_id": 5 }`.
+
+**GET /api/v1/wishlist/check/{productId}:** `data.is_in_wishlist` (boolean).
+
+---
+
+## 8. Orders
+
+**Auth:** Required. Orders are created as **inquiries** (no online payment); admin follows up.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/orders` | List orders (paginated) |
+| GET | `/api/v1/orders/{orderNumber}` | Single order |
+| POST | `/api/v1/orders` | Create order (from cart) |
+| GET | `/api/v1/orders/{orderNumber}/invoice` | Invoice data |
+
+**Query params for GET /api/v1/orders:**
+
+- `status`: `inquiry` \| `pending` \| `processing` \| `shipped` \| `delivered` \| `cancelled`
+- `payment_status`: `not_required` \| `pending` \| `paid` \| `failed` \| `refunded`
+- `per_page`, `page`
+
+**POST /api/v1/orders** – Create order from current cart:
+
 ```json
 {
   "customer_name": "John Doe",
   "customer_email": "john@example.com",
-  "customer_phone": "+1234567890",
-  "billing_address": "123 Main Street, City, State, ZIP",
-  "shipping_address": "123 Main Street, City, State, ZIP",
+  "customer_phone": "9876543210",
+  "billing_address": "123 Main St, City, State - 400001",
+  "shipping_address": "123 Main St, City, State - 400001",
   "notes": "Please call before delivery"
 }
 ```
 
-**Note**: 
-- `customer_phone` is **required** (for admin follow-up)
-- `shipping_address` is optional (defaults to billing_address)
-- `notes` is optional
+`shipping_address` is optional (defaults to billing). Cart is cleared on success.
 
-**Response**:
-```json
-{
-  "success": true,
-  "message": "Inquiry received! We will contact you shortly to confirm your order.",
-  "data": {
-    "order_number": "AGR-T5BSBQTM",
-    "customer_name": "John Doe",
-    "customer_email": "john@example.com",
-    "customer_phone": "+1234567890",
-    "billing_address": {
-      "address": "123 Main Street, City, State, ZIP"
+**Order object:**
+
+- `order_number`, `customer_name`, `customer_email`, `customer_phone`
+- `billing_address`, `shipping_address` (may be objects with `address`)
+- `subtotal`, `tax_amount`, `shipping_amount`, `total_amount`
+- `payment_method`, `payment_status`, `order_status`, `is_inquiry`
+- `notes`, `store` (name, tagline, logo)
+- `items`: array of product_name, sku, quantity, price, total, image, offer
+- `created_at`, `updated_at`
+
+---
+
+## 9. Offers
+
+Public list/show; optional auth for dealer-specific offers.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/offers` | List offers |
+| GET | `/api/v1/offers/{id}` | Single offer |
+| GET | `/api/v1/offers/product/{productId}` | Offers for a product |
+| POST | `/api/v1/offers/calculate-discount` | Calculate discount (body: product/cart info as required by backend) |
+
+Query: `type`, `featured` (bool). Response includes `data` (array or object) and optionally `count`.
+
+---
+
+## 10. Notifications
+
+**Auth:** Required.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/notifications` | List (paginated) |
+| POST | `/api/v1/notifications/{id}/read` | Mark one read |
+| POST | `/api/v1/notifications/read-all` | Mark all read |
+
+Notification item: `id`, `title`, `message`, `type`, `is_read`, `created_at` (ISO).
+
+---
+
+## 11. Dealer
+
+**Auth:** Required.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/dealer/status` | Dealer status & registration info |
+| POST | `/api/v1/dealer/register` | Submit dealer registration |
+
+**POST /api/v1/dealer/register** – Only for users with `role: dealer`. Body typically includes: `name`, `email`, `business_name`, `gst_number`, `business_address`, `phone`, `company_website`, `business_description`, `pan_number`, and optionally `terms_accepted`. Check backend validation for exact required fields.
+
+---
+
+## 12. Flutter Integration Tips
+
+### Base URL and client
+
+```dart
+const String baseUrl = 'https://your-domain.com/api/v1';
+
+class ApiClient {
+  final String? token;
+  final Dio _dio = Dio(BaseOptions(
+    baseUrl: baseUrl,
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
     },
-    "shipping_address": {
-      "address": "123 Main Street, City, State, ZIP"
-    },
-    "subtotal": 100000.00,
-    "tax_amount": 8000.00,
-    "shipping_amount": 25.00,
-    "total_amount": 108025.00,
-    "payment_method": "inquiry",
-    "payment_status": "not_required",
-    "order_status": "inquiry",
-    "is_inquiry": true,
-    "notes": "Please call before delivery",
-    "items": [
-      {
-        "product_id": 1,
-        "product_name": "Tractor Model X",
-        "product_sku": "TRC-001",
-        "quantity": 2,
-        "price": 50000.00,
-        "total": 100000.00,
-        "image": "https://your-domain.com/storage/products/primary/tractor.jpg?v=1234567890"
-      }
-    ],
-    "created_at": "2025-11-08T10:30:00.000000Z",
-    "updated_at": "2025-11-08T10:30:00.000000Z"
+  ));
+
+  ApiClient({this.token}) {
+    if (token != null) {
+      _dio.options.headers['Authorization'] = 'Bearer $token';
+    }
   }
 }
 ```
 
-**Key Fields**:
-- `order_status: "inquiry"` - Order is an inquiry
-- `payment_status: "not_required"` - No payment needed
-- `is_inquiry: true` - Helper flag for UI
-- `order_number` - Unique identifier (save this!)
+### Storing token after login/OTP verify
 
-### 12. Get User Orders
+After **password login**, **OTP login verify**, or **OTP register verify**, save `data.token` and `data.user` (e.g. with `shared_preferences` or `flutter_secure_storage`), then use the token for all protected requests.
 
-**Endpoint**: `GET /api/v1/orders`
+### OTP flow in Flutter
 
-**Query Parameters**:
-- `status` (optional): Filter by status (`inquiry`, `pending`, `processing`, `shipped`, `delivered`, `cancelled`)
-- `payment_status` (optional): Filter by payment status (`not_required`, `pending`, `paid`, `failed`, `refunded`)
-- `per_page` (optional): Items per page (default: 15)
-- `page` (optional): Page number
+1. **Login with OTP:** Call `POST /auth/otp/login/start` with email/phone + password → show OTP input → call `POST /auth/otp/login/verify` with `otp_token` + `otp` → save token and user.
+2. **Register with OTP:** Call `POST /auth/otp/register/start` with name, email, password, role, phone → show OTP input → call `POST /auth/otp/register/verify` with `otp_token` + `otp` → save token and user.
 
-**Response**:
-```json
-{
-  "success": true,
-  "data": {
-    "current_page": 1,
-    "data": [
-      {
-        "order_number": "AGR-T5BSBQTM",
-        "customer_name": "John Doe",
-        "customer_email": "john@example.com",
-        "customer_phone": "+1234567890",
-        "billing_address": {
-      "address": "123 Main Street, City, State, ZIP"
-    },
-        "shipping_address": {
-      "address": "123 Main Street, City, State, ZIP"
-    },
-        "subtotal": 100000.00,
-        "tax_amount": 8000.00,
-        "shipping_amount": 25.00,
-        "total_amount": 108025.00,
-        "payment_method": "inquiry",
-        "payment_status": "not_required",
-        "order_status": "inquiry",
-        "is_inquiry": true,
-        "notes": null,
-        "items": [
-          {
-            "product_id": 1,
-            "product_name": "Tractor Model X",
-            "product_sku": "TRC-001",
-            "quantity": 2,
-            "price": 50000.00,
-            "total": 100000.00,
-            "image": "https://your-domain.com/storage/products/primary/tractor.jpg?v=1234567890"
-          }
-        ],
-        "created_at": "2025-11-08T10:30:00.000000Z",
-        "updated_at": "2025-11-08T10:30:00.000000Z"
-      }
-    ],
-    "total": 1,
-    "per_page": 15
-  }
-}
+### Sending token on requests
+
+For every request to a protected route, set:
+
+```
+Authorization: Bearer <token>
 ```
 
-### 13. Get Single Order
+### Pagination
 
-**Endpoint**: `GET /api/v1/orders/{orderNumber}`
-
-**Example**: `GET /api/v1/orders/AGR-T5BSBQTM`
-
-**Response**: Same format as order item in list above.
-
-### 14. Get Order Invoice Data
-
-**Endpoint**: `GET /api/v1/orders/{orderNumber}/invoice`
-
-**Response**: Same format as single order (returns order data for invoice generation).
+List endpoints that support pagination return Laravel-style pagination: `data.current_page`, `data.last_page`, `data.per_page`, `data.total`, `data.data` (items).
 
 ---
 
-## Request/Response Formats
+## 13. Error Handling
 
-### Standard Success Response
-```json
-{
-  "success": true,
-  "message": "Optional message",
-  "data": { ... }
-}
-```
+- **200/201:** Success; use `data` or `message` as needed.
+- **400:** Bad request (e.g. empty cart, no phone for OTP).
+- **401:** Unauthorized (invalid credentials or missing/invalid token).
+- **403:** Forbidden (e.g. offer not for your account type).
+- **404:** Resource not found.
+- **422:** Validation error; body has `message` and `errors` (field-wise).
+- **429:** Too many OTP requests; wait ~1 minute before resending.
+- **500:** Server error; show generic message and retry option.
 
-### Standard Error Response
-```json
-{
-  "success": false,
-  "message": "Error message",
-  "errors": {
-    "field_name": ["Error message for this field"]
-  }
-}
-```
+Standard error body shape:
 
-### Pagination Format
-```json
-{
-  "current_page": 1,
-  "data": [ ... ],
-  "first_page_url": "https://...",
-  "from": 1,
-  "last_page": 5,
-  "last_page_url": "https://...",
-  "next_page_url": "https://...",
-  "path": "https://...",
-  "per_page": 15,
-  "prev_page_url": null,
-  "to": 15,
-  "total": 75
-}
-```
-
----
-
-## Status Codes
-
-### Order Status
-
-| Status | Description | UI Color Suggestion |
-|--------|-------------|---------------------|
-| `inquiry` | Initial inquiry submitted | Blue/Info |
-| `pending` | Order confirmed, awaiting processing | Yellow/Warning |
-| `processing` | Order being prepared | Blue/Primary |
-| `shipped` | Order has been shipped | Blue/Info |
-| `delivered` | Order delivered successfully | Green/Success |
-| `cancelled` | Order cancelled | Red/Danger |
-
-### Payment Status
-
-| Status | Description | When Used |
-|--------|-------------|-----------|
-| `not_required` | No payment needed | For inquiries |
-| `pending` | Payment pending | When order is confirmed |
-| `paid` | Payment received | After payment |
-| `failed` | Payment failed | If payment fails |
-| `refunded` | Payment refunded | If order cancelled/refunded |
-
-### Helper Flag
-
-- `is_inquiry: true/false` - Use this to show inquiry-specific UI (e.g., "We'll contact you" message)
-
----
-
-## Error Handling
-
-### HTTP Status Codes
-
-- `200` - Success
-- `201` - Created (for new orders)
-- `400` - Bad Request (validation errors)
-- `401` - Unauthorized (missing/invalid token)
-- `404` - Not Found
-- `422` - Validation Error
-- `500` - Server Error
-
-### Common Error Scenarios
-
-#### 1. Validation Error (422)
 ```json
 {
   "success": false,
   "message": "Validation failed",
   "errors": {
-    "customer_phone": ["The customer phone field is required."],
-    "customer_email": ["The customer email must be a valid email address."]
-  }
-}
-```
-
-#### 2. Unauthorized (401)
-```json
-{
-  "success": false,
-  "message": "Unauthenticated."
-}
-```
-
-#### 3. Empty Cart (400)
-```json
-{
-  "success": false,
-  "message": "Your cart is empty. Please add items before checkout."
-}
-```
-
-#### 4. Order Not Found (404)
-```json
-{
-  "success": false,
-  "message": "Order not found"
-}
-```
-
-### Error Handling Best Practices
-
-1. **Always check `success` field** before accessing `data`
-2. **Handle validation errors** by displaying field-specific messages
-3. **Show user-friendly messages** for common errors
-4. **Retry logic** for network errors (401, 500)
-5. **Log errors** for debugging
-
----
-
-## Image Handling
-
-### Image URLs
-
-All image URLs returned by the API are **absolute URLs** (full URLs starting with `http://` or `https://`).
-
-### Cache Busting
-
-Image URLs include a cache buster parameter (`?v=timestamp`) to ensure fresh images:
-```
-https://your-domain.com/storage/products/primary/tractor.jpg?v=1234567890
-```
-
-### Image Fields
-
-- `image` - Main product image (single URL)
-- `images` - Array of gallery images (array of URLs)
-
-### Loading Images in Flutter
-
-```dart
-// Example using CachedNetworkImage
-CachedNetworkImage(
-  imageUrl: product['image'],
-  placeholder: (context, url) => CircularProgressIndicator(),
-  errorWidget: (context, url, error) => Icon(Icons.error),
-)
-```
-
-### Image Fallback
-
-If an image URL is `null` or fails to load, show a placeholder image.
-
----
-
-## Complete Workflow Example
-
-### Step 1: Login
-```dart
-// POST /api/v1/login
-final response = await http.post(
-  Uri.parse('https://your-domain.com/api/v1/login'),
-  headers: {'Content-Type': 'application/json'},
-  body: jsonEncode({
-    'email': 'customer@example.com',
-    'password': 'password123',
-  }),
-);
-
-final data = jsonDecode(response.body);
-final token = data['data']['token'];
-// Store token securely
-```
-
-### Step 2: Get Categories
-```dart
-// GET /api/v1/categories
-final response = await http.get(
-  Uri.parse('https://your-domain.com/api/v1/categories'),
-  headers: {
-    'Authorization': 'Bearer $token',
-    'Accept': 'application/json',
-  },
-);
-
-final data = jsonDecode(response.body);
-final categories = data['data'];
-// Each category includes subcategories array
-```
-
-### Step 3: Get Subcategories
-```dart
-// GET /api/v1/subcategories?category_id=1
-final response = await http.get(
-  Uri.parse('https://your-domain.com/api/v1/subcategories?category_id=1'),
-  headers: {
-    'Authorization': 'Bearer $token',
-    'Accept': 'application/json',
-  },
-);
-
-final data = jsonDecode(response.body);
-final subcategories = data['data'];
-```
-
-### Step 4: Get Products
-```dart
-// GET /api/v1/products?category_id=1&subcategory_id=2
-final response = await http.get(
-  Uri.parse('https://your-domain.com/api/v1/products?category_id=1&subcategory_id=2'),
-  headers: {
-    'Authorization': 'Bearer $token',
-    'Accept': 'application/json',
-  },
-);
-
-final data = jsonDecode(response.body);
-final products = data['data']['data'];
-// Each product includes category and subcategory
-```
-
-### Step 5: Add to Cart
-```dart
-// POST /api/v1/cart/add
-final response = await http.post(
-  Uri.parse('https://your-domain.com/api/v1/cart/add'),
-  headers: {
-    'Authorization': 'Bearer $token',
-    'Content-Type': 'application/json',
-  },
-  body: jsonEncode({
-    'product_id': 1,
-    'quantity': 2,
-  }),
-);
-```
-
-### Step 6: Get Cart
-```dart
-// GET /api/v1/cart
-final response = await http.get(
-  Uri.parse('https://your-domain.com/api/v1/cart'),
-  headers: {
-    'Authorization': 'Bearer $token',
-    'Accept': 'application/json',
-  },
-);
-
-final cart = jsonDecode(response.body)['data'];
-```
-
-### Step 7: Create Order (Inquiry)
-```dart
-// POST /api/v1/orders
-final response = await http.post(
-  Uri.parse('https://your-domain.com/api/v1/orders'),
-  headers: {
-    'Authorization': 'Bearer $token',
-    'Content-Type': 'application/json',
-  },
-  body: jsonEncode({
-    'customer_name': 'John Doe',
-    'customer_email': 'john@example.com',
-    'customer_phone': '+1234567890',
-    'billing_address': '123 Main Street, City, State, ZIP',
-    'shipping_address': '123 Main Street, City, State, ZIP',
-    'notes': 'Please call before delivery',
-  }),
-);
-
-if (response.statusCode == 201) {
-  final order = jsonDecode(response.body)['data'];
-  final orderNumber = order['order_number'];
-  // Show success message
-  // Navigate to order details
-}
-```
-
-### Step 8: View Orders
-```dart
-// GET /api/v1/orders?status=inquiry
-final response = await http.get(
-  Uri.parse('https://your-domain.com/api/v1/orders?status=inquiry'),
-  headers: {
-    'Authorization': 'Bearer $token',
-    'Accept': 'application/json',
-  },
-);
-
-final orders = jsonDecode(response.body)['data']['data'];
-```
-
-### Step 9: View Order Details
-```dart
-// GET /api/v1/orders/AGR-T5BSBQTM
-final response = await http.get(
-  Uri.parse('https://your-domain.com/api/v1/orders/$orderNumber'),
-  headers: {
-    'Authorization': 'Bearer $token',
-    'Accept': 'application/json',
-  },
-);
-
-final order = jsonDecode(response.body)['data'];
-```
-
----
-
-## Best Practices
-
-### 1. Token Management
-- **Store token securely** (use `flutter_secure_storage` or similar)
-- **Refresh token** before expiration
-- **Handle token expiration** gracefully (redirect to login)
-
-### 2. Error Handling
-```dart
-try {
-  final response = await http.get(...);
-  
-  if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    if (data['success'] == true) {
-      // Handle success
-    } else {
-      // Handle API error
-      showError(data['message']);
-    }
-  } else if (response.statusCode == 401) {
-    // Token expired, redirect to login
-    navigateToLogin();
-  } else {
-    // Handle other errors
-    showError('Something went wrong');
-  }
-} catch (e) {
-  // Handle network errors
-  showError('Network error: ${e.toString()}');
-}
-```
-
-### 3. Loading States
-- Show loading indicators during API calls
-- Disable buttons while processing
-- Use skeleton loaders for better UX
-
-### 4. Form Validation
-- Validate on client-side before API call
-- Show field-specific error messages
-- Highlight invalid fields
-
-### 5. Order Status Display
-```dart
-String getStatusColor(String status) {
-  switch (status) {
-    case 'inquiry':
-      return 'info'; // Blue
-    case 'pending':
-      return 'warning'; // Yellow
-    case 'processing':
-      return 'primary'; // Blue
-    case 'shipped':
-      return 'info'; // Blue
-    case 'delivered':
-      return 'success'; // Green
-    case 'cancelled':
-      return 'danger'; // Red
-    default:
-      return 'secondary';
-  }
-}
-
-String getStatusText(String status) {
-  if (status == 'inquiry') {
-    return 'Inquiry - We\'ll contact you soon';
-  }
-  return status.toUpperCase();
-}
-```
-
-### 6. Inquiry-Specific UI
-```dart
-if (order['is_inquiry'] == true) {
-  // Show inquiry message
-  return Card(
-    child: Column(
-      children: [
-        Icon(Icons.info, color: Colors.blue),
-        Text('Inquiry Received'),
-        Text('We will contact you within 24 hours to confirm your order.'),
-        Text('Phone: ${order['customer_phone']}'),
-      ],
-    ),
-  );
-}
-```
-
-### 7. Image Loading
-- Use cached network images
-- Show placeholders while loading
-- Handle image load errors gracefully
-- Respect cache buster parameters
-
-### 8. Pagination
-- Implement infinite scroll or "Load More" button
-- Track current page
-- Handle empty states
-
-### 9. Network Resilience
-- Implement retry logic for failed requests
-- Show offline indicators
-- Cache critical data locally
-
-### 10. User Feedback
-- Show success messages after actions
-- Confirm destructive actions (e.g., cancel order)
-- Provide clear error messages
-
----
-
-## Testing Checklist
-
-Before going live, test:
-
-- [ ] Login/Logout flow
-- [ ] Browse products
-- [ ] Add/remove from cart
-- [ ] Create order (inquiry)
-- [ ] View order list
-- [ ] Filter orders by status
-- [ ] View order details
-- [ ] Handle empty cart error
-- [ ] Handle validation errors
-- [ ] Handle network errors
-- [ ] Handle token expiration
-- [ ] Image loading (with cache busting)
-- [ ] Pagination
-- [ ] Offline handling
-
----
-
-## Support
-
-For API issues or questions:
-- Check API response for error messages
-- Verify token is valid and included in headers
-- Ensure all required fields are provided
-- Check network connectivity
-
----
-
-## Product Filtering Examples
-
-### Filter by Category
-```dart
-// GET /api/v1/products?category_id=1
-final uri = Uri.parse('https://your-domain.com/api/v1/products')
-    .replace(queryParameters: {'category_id': '1'});
-```
-
-### Filter by Subcategory
-```dart
-// GET /api/v1/products?subcategory_id=2
-final uri = Uri.parse('https://your-domain.com/api/v1/products')
-    .replace(queryParameters: {'subcategory_id': '2'});
-```
-
-### Filter by Category and Subcategory
-```dart
-// GET /api/v1/products?category_id=1&subcategory_id=2
-final uri = Uri.parse('https://your-domain.com/api/v1/products')
-    .replace(queryParameters: {
-      'category_id': '1',
-      'subcategory_id': '2'
-    });
-```
-
-### Search Products
-```dart
-// GET /api/v1/products/search?q=tractor
-final uri = Uri.parse('https://your-domain.com/api/v1/products/search')
-    .replace(queryParameters: {'q': 'tractor'});
-```
-
-## Flutter Code Examples
-
-### Complete Product Model
-```dart
-class Product {
-  final int id;
-  final String name;
-  final String slug;
-  final String sku;
-  final double price;
-  final double? originalPrice;
-  final double? salePrice;
-  final double? dealerPrice;
-  final String image;
-  final List<String> images;
-  final Category category;
-  final Subcategory? subcategory;
-  final bool inStock;
-  final int stockQuantity;
-  
-  Product({
-    required this.id,
-    required this.name,
-    required this.slug,
-    required this.sku,
-    required this.price,
-    this.originalPrice,
-    this.salePrice,
-    this.dealerPrice,
-    required this.image,
-    required this.images,
-    required this.category,
-    this.subcategory,
-    required this.inStock,
-    required this.stockQuantity,
-  });
-  
-  factory Product.fromJson(Map<String, dynamic> json) {
-    return Product(
-      id: json['id'],
-      name: json['name'],
-      slug: json['slug'],
-      sku: json['sku'],
-      price: (json['price'] as num).toDouble(),
-      originalPrice: json['original_price'] != null 
-          ? (json['original_price'] as num).toDouble() 
-          : null,
-      salePrice: json['sale_price'] != null 
-          ? (json['sale_price'] as num).toDouble() 
-          : null,
-      dealerPrice: json['dealer_price'] != null 
-          ? (json['dealer_price'] as num).toDouble() 
-          : null,
-      image: json['image'] ?? '',
-      images: List<String>.from(json['images'] ?? []),
-      category: Category.fromJson(json['category']),
-      subcategory: json['subcategory'] != null 
-          ? Subcategory.fromJson(json['subcategory']) 
-          : null,
-      inStock: json['in_stock'] ?? false,
-      stockQuantity: json['stock_quantity'] ?? 0,
-    );
-  }
-}
-
-class Category {
-  final int id;
-  final String name;
-  final String slug;
-  final List<Subcategory>? subcategories;
-  
-  Category({
-    required this.id,
-    required this.name,
-    required this.slug,
-    this.subcategories,
-  });
-  
-  factory Category.fromJson(Map<String, dynamic> json) {
-    return Category(
-      id: json['id'],
-      name: json['name'],
-      slug: json['slug'],
-      subcategories: json['subcategories'] != null
-          ? (json['subcategories'] as List)
-              .map((s) => Subcategory.fromJson(s))
-              .toList()
-          : null,
-    );
-  }
-}
-
-class Subcategory {
-  final int id;
-  final String name;
-  final String slug;
-  final int? categoryId;
-  final Category? category;
-  
-  Subcategory({
-    required this.id,
-    required this.name,
-    required this.slug,
-    this.categoryId,
-    this.category,
-  });
-  
-  factory Subcategory.fromJson(Map<String, dynamic> json) {
-    return Subcategory(
-      id: json['id'],
-      name: json['name'],
-      slug: json['slug'],
-      categoryId: json['category_id'],
-      category: json['category'] != null 
-          ? Category.fromJson(json['category']) 
-          : null,
-    );
-  }
-}
-```
-
-### API Service Example
-```dart
-class ApiService {
-  final String baseUrl = 'https://your-domain.com/api/v1';
-  final String? token;
-  
-  ApiService({this.token});
-  
-  Map<String, String> get headers => {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-    if (token != null) 'Authorization': 'Bearer $token',
-  };
-  
-  // Get Categories
-  Future<List<Category>> getCategories() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/categories'),
-      headers: headers,
-    );
-    
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['success'] == true) {
-        return (data['data'] as List)
-            .map((json) => Category.fromJson(json))
-            .toList();
-      }
-    }
-    throw Exception('Failed to load categories');
-  }
-  
-  // Get Subcategories
-  Future<List<Subcategory>> getSubcategories({int? categoryId}) async {
-    final uri = Uri.parse('$baseUrl/subcategories');
-    final queryParams = categoryId != null 
-        ? {'category_id': categoryId.toString()} 
-        : {};
-    
-    final response = await http.get(
-      uri.replace(queryParameters: queryParams),
-      headers: headers,
-    );
-    
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['success'] == true) {
-        return (data['data'] as List)
-            .map((json) => Subcategory.fromJson(json))
-            .toList();
-      }
-    }
-    throw Exception('Failed to load subcategories');
-  }
-  
-  // Get Products
-  Future<Map<String, dynamic>> getProducts({
-    int? categoryId,
-    int? subcategoryId,
-    String? search,
-    String sort = 'name',
-    int page = 1,
-    int perPage = 15,
-  }) async {
-    final queryParams = <String, String>{
-      'sort': sort,
-      'page': page.toString(),
-      'per_page': perPage.toString(),
-    };
-    
-    if (categoryId != null) {
-      queryParams['category_id'] = categoryId.toString();
-    }
-    if (subcategoryId != null) {
-      queryParams['subcategory_id'] = subcategoryId.toString();
-    }
-    if (search != null && search.isNotEmpty) {
-      queryParams['search'] = search;
-    }
-    
-    final response = await http.get(
-      Uri.parse('$baseUrl/products')
-          .replace(queryParameters: queryParams),
-      headers: headers,
-    );
-    
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['success'] == true) {
-        return {
-          'products': (data['data']['data'] as List)
-              .map((json) => Product.fromJson(json))
-              .toList(),
-          'pagination': data['data'],
-        };
-      }
-    }
-    throw Exception('Failed to load products');
-  }
-  
-  // Get Single Product
-  Future<Product> getProduct(String slug) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/products/$slug'),
-      headers: headers,
-    );
-    
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['success'] == true) {
-        return Product.fromJson(data['data']);
-      }
-    }
-    throw Exception('Failed to load product');
-  }
-}
-```
-
-### UI Example: Category and Subcategory Selection
-```dart
-class CategorySubcategorySelector extends StatefulWidget {
-  @override
-  _CategorySubcategorySelectorState createState() => 
-      _CategorySubcategorySelectorState();
-}
-
-class _CategorySubcategorySelectorState 
-    extends State<CategorySubcategorySelector> {
-  List<Category> categories = [];
-  List<Subcategory> subcategories = [];
-  Category? selectedCategory;
-  Subcategory? selectedSubcategory;
-  
-  @override
-  void initState() {
-    super.initState();
-    loadCategories();
-  }
-  
-  Future<void> loadCategories() async {
-    final cats = await ApiService().getCategories();
-    setState(() {
-      categories = cats;
-    });
-  }
-  
-  Future<void> loadSubcategories(int categoryId) async {
-    final subs = await ApiService().getSubcategories(categoryId: categoryId);
-    setState(() {
-      subcategories = subs;
-      selectedSubcategory = null; // Reset subcategory when category changes
-    });
-  }
-  
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Category Dropdown
-        DropdownButton<Category>(
-          value: selectedCategory,
-          hint: Text('Select Category'),
-          items: categories.map((category) {
-            return DropdownMenuItem(
-              value: category,
-              child: Text(category.name),
-            );
-          }).toList(),
-          onChanged: (Category? category) {
-            setState(() {
-              selectedCategory = category;
-            });
-            if (category != null) {
-              loadSubcategories(category.id);
-            }
-          },
-        ),
-        
-        // Subcategory Dropdown (only show if category is selected)
-        if (selectedCategory != null)
-          DropdownButton<Subcategory>(
-            value: selectedSubcategory,
-            hint: Text('Select Subcategory (Optional)'),
-            items: subcategories.map((subcategory) {
-              return DropdownMenuItem(
-                value: subcategory,
-                child: Text(subcategory.name),
-              );
-            }).toList(),
-            onChanged: (Subcategory? subcategory) {
-              setState(() {
-                selectedSubcategory = subcategory;
-              });
-            },
-          ),
-      ],
-    );
+    "email": ["The email field is required."]
   }
 }
 ```
 
 ---
 
-## Changelog
+## Quick Reference: Auth & OTP Endpoints
 
-### Version 1.1 (2025-11-08)
-- Added subcategory support
-- Added subcategory endpoints
-- Updated product responses to include subcategory
-- Updated category responses to include subcategories
-- Added subcategory filtering for products
-- Enhanced Flutter code examples
+| Flow | Step | Method | Endpoint |
+|------|------|--------|----------|
+| Password login | 1 | POST | `/api/v1/login` |
+| OTP login | 1 | POST | `/api/v1/auth/otp/login/start` |
+| OTP login | 2 | POST | `/api/v1/auth/otp/login/verify` |
+| Password register | 1 | POST | `/api/v1/register` |
+| OTP register | 1 | POST | `/api/v1/auth/otp/register/start` |
+| OTP register | 2 | POST | `/api/v1/auth/otp/register/verify` |
+| Logout | - | POST | `/api/v1/logout` |
+| Current user | - | GET | `/api/v1/user` |
 
-### Version 1.0 (2025-11-08)
-- Initial API documentation
-- Inquiry-based order system
-- Image URL handling with cache busting
-- Complete workflow examples
-
----
-
-**Last Updated**: November 8, 2025
-
-
+All OTP is sent via **WhatsApp** to the user’s phone number. OTP is 6 digits; `otp_token` expires in about 10 minutes (configurable on server).

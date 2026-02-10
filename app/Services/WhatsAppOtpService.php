@@ -16,7 +16,8 @@ class WhatsAppOtpService
 
     public function __construct()
     {
-        $this->apiKey = config('otp.whatsapp.api_key', '');
+        // Ensure apiKey is always a string (env may be null on some servers)
+        $this->apiKey = (string) config('otp.whatsapp.api_key', '');
         $this->apiUrl = config('otp.whatsapp.api_url');
         $this->enabled = config('otp.whatsapp.enabled', true) && !empty($this->apiKey);
         $this->expiryMinutes = (int) config('otp.expiry_minutes', 10);
@@ -137,7 +138,8 @@ class WhatsAppOtpService
         $url = rtrim($this->apiUrl, '/');
 
         // BigTos Send Text API: key, mobileno, msg, type (POST form)
-        $isBigTos = (str_contains($url, 'bigtos.com'));
+        // Use strpos instead of str_contains for compatibility with older PHP versions
+        $isBigTos = (strpos($url, 'bigtos.com') !== false);
         $payload = $isBigTos
             ? [
                 'key' => $this->apiKey,

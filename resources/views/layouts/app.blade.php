@@ -198,8 +198,9 @@
         }
 
         .logo-img {
-            max-height: 45px;
+            max-height: 72px;
             width: auto;
+            height: auto;
         }
 
         .mobile-menu-toggle {

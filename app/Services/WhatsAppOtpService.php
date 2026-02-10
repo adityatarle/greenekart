@@ -91,8 +91,8 @@ class WhatsAppOtpService
 
     protected function otpMessage(string $otp): string
     {
-        $app = config('app.name');
-        return "Your {$app} verification code is: {$otp}. Valid for " . $this->expiryMinutes . " minutes. Do not share with anyone.";
+        // Custom WhatsApp OTP text for Greenekart
+        return "This is your OTP for greenekart.in: {$otp}. It is valid for {$this->expiryMinutes} minutes. Do not share this code with anyone.";
     }
 
     /**

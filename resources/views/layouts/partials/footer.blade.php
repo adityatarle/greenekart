@@ -2,10 +2,12 @@
       <div class="container-lg">
         <div class="row">
 
-          <!-- First column - Greenleaf + description + social icons -->
+          <!-- First column - Greenleaf logo + description + social icons -->
           <div class="col-lg-3 col-md-6 col-sm-6 mb-4 mb-lg-0">
             <div class="footer-menu">
-              <span class="fw-bold text-success" style="font-size: 1.85rem; letter-spacing: -0.5px;">Greenleaf</span>
+              <a href="{{ route('agriculture.home') }}" class="d-inline-flex align-items-center mb-3">
+                <img src="{{ asset('assets/logo/logo.png') }}" alt="Greenleaf" style="max-height: 72px; width: auto;">
+              </a>
 
               <!-- Short company description -->
               <p class="text-white-75 small mt-2 mb-4" style="line-height: 1.5;">

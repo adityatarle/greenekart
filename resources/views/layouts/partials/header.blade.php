@@ -313,12 +313,8 @@
           
           <!-- Logo Section -->
           <div class="header-logo">
-            <a href="{{ route('agriculture.home') }}" class="logo-link">
-              @if(!empty($siteSettings['site_logo']))
-                <img src="{{ asset('storage/' . $siteSettings['site_logo']) }}" alt="Greenleaf" class="logo-img">
-              @else
-                <span class="logo-text">Greenleaf</span>
-              @endif
+            <a href="{{ route('agriculture.home') }}" class="logo-link d-flex align-items-center">
+              <img src="{{ asset('assets/logo/logo.png') }}" alt="Greenleaf" class="logo-img" style="max-height: 72px; width: auto;">
             </a>
             <button class="mobile-menu-toggle d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use xlink:href="#menu"></use></svg>

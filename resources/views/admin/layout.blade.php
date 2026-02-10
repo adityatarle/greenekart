@@ -294,8 +294,9 @@
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
-        <div class="sidebar-header">
-            <h4><i class="fas fa-tractor me-2"></i>Agriculture Dashboard</h4>
+        <div class="sidebar-header d-flex align-items-center gap-2">
+            <img src="{{ asset('assets/logo/logo.png') }}" alt="Greenleaf" style="max-height: 48px; width: auto;">
+            <h4 class="mb-0">Admin Dashboard</h4>
         </div>
         <nav class="sidebar-nav">
             <ul class="nav flex-column">

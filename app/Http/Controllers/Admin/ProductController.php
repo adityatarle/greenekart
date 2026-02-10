@@ -109,7 +109,8 @@ class ProductController extends Controller
             
             $data = $request->validated();
             $data['slug'] = Str::slug($request->name);
-            
+            $data['youtube_video_url'] = $request->filled('youtube_video_url') ? trim($request->youtube_video_url) : null;
+
             // Handle primary image upload
             if ($request->hasFile('primary_image')) {
                 $primaryImagePath = $this->fileUploadService->uploadProductImage(
@@ -290,6 +291,7 @@ class ProductController extends Controller
                 'warranty' => 'nullable|string|max:255',
                 'weight' => 'nullable|numeric|min:0',
                 'dimensions' => 'nullable|string|max:255',
+                'youtube_video_url' => 'nullable|string|max:500|url',
                 'agriculture_category_id' => 'required|exists:agriculture_categories,id',
                 'agriculture_subcategory_id' => 'nullable|exists:agriculture_subcategories,id',
                 'is_featured' => 'boolean',
@@ -302,7 +304,8 @@ class ProductController extends Controller
             
             $data = $validated;
             $data['slug'] = Str::slug($request->name);
-            
+            $data['youtube_video_url'] = $request->filled('youtube_video_url') ? trim($request->youtube_video_url) : null;
+
             // Handle primary image replacement
             if ($request->hasFile('primary_image')) {
                 // Delete old primary image if exists

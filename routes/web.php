@@ -23,6 +23,11 @@ Route::prefix('auth')->name('auth.')->group(function () {
         ->name('register');
     
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::get('/otp/verify', [AuthController::class, 'showOtpVerify'])->name('otp.verify');
+    Route::post('/otp/verify', [AuthController::class, 'verifyOtp'])
+        ->middleware('throttle:10,1')
+        ->name('otp.verify.submit');
     
     // Specific login routes with strict rate limiting
     Route::get('/customer-login', [AuthController::class, 'showCustomerLogin'])->name('customer-login');

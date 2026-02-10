@@ -15,6 +15,7 @@ class AgricultureProduct extends Model
         'slug',
         'description',
         'short_description',
+        'youtube_video_url',
         'price',
         'sale_price',
         'dealer_price',
@@ -249,5 +250,27 @@ class AgricultureProduct extends Model
     public function scopeByPowerSource($query, $powerSource)
     {
         return $query->where('power_source', $powerSource);
+    }
+
+    /**
+     * Get YouTube video ID from youtube_video_url for embedding.
+     * Supports: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID
+     */
+    public function getYoutubeVideoIdAttribute(): ?string
+    {
+        $url = $this->youtube_video_url;
+        if (empty($url)) {
+            return null;
+        }
+        if (preg_match('/^(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]+)/', $url, $m)) {
+            return $m[1];
+        }
+        if (preg_match('/^(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/', $url, $m)) {
+            return $m[1];
+        }
+        if (preg_match('/^(?:https?:\/\/)?youtu\.be\/([a-zA-Z0-9_-]+)/', $url, $m)) {
+            return $m[1];
+        }
+        return null;
     }
 }

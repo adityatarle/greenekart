@@ -127,7 +127,20 @@
                 @if($product->description)
                 <div class="product-description-card mb-3">
                     <h6 class="section-title">Description</h6>
-                    <div class="description-text">{!! nl2br(e($product->description)) !!}</div>
+                    <div class="description-text">{!! $product->description !!}</div>
+                </div>
+                @endif
+
+                @if($product->youtube_video_id)
+                <div class="product-video-card mb-3">
+                    <h6 class="section-title">Product Video</h6>
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube.com/embed/{{ $product->youtube_video_id }}?rel=0" 
+                                title="Product video" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen></iframe>
+                    </div>
                 </div>
                 @endif
                 
@@ -493,6 +506,33 @@
 
 .description-text p:last-child {
     margin-bottom: 0;
+}
+
+/* Product Video (YouTube embed) */
+.product-video-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.video-wrapper {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 */
+    height: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #000;
+}
+
+.video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }
 
 /* Add to Cart */

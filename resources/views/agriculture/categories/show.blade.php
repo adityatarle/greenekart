@@ -133,12 +133,23 @@
             
             <div class="categories-grid">
                 @foreach($otherCategories as $otherCategory)
+                    @php
+                        $otherCatImageUrl = $otherCategory->image
+                            ? \App\Helpers\ImageHelper::imageUrl($otherCategory->image)
+                            : null;
+                    @endphp
                     <a href="{{ route('agriculture.categories.show', $otherCategory) }}" class="category-card">
-                        <div class="card-icon">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                            </svg>
-                        </div>
+                        @if($otherCatImageUrl)
+                            <div class="card-image">
+                                <img src="{{ $otherCatImageUrl }}" alt="{{ $otherCategory->name }}">
+                            </div>
+                        @else
+                            <div class="card-icon">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                </svg>
+                            </div>
+                        @endif
                         <h4 class="card-title">{{ $otherCategory->name }}</h4>
                         <p class="card-count">{{ $otherCategory->products_count ?? 0 }} Products</p>
                         <span class="card-arrow">
@@ -513,6 +524,28 @@
 .category-card:hover .card-icon {
     background: linear-gradient(135deg, #6BB252 0%, #5a9a45 100%);
     color: #ffffff;
+}
+
+.card-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #e8f5e3 0%, #d4edcf 100%);
+    flex-shrink: 0;
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.category-card:hover .card-image img {
+    transform: scale(1.08);
 }
 
 .card-title {

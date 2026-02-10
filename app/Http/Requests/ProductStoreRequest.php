@@ -62,6 +62,12 @@ class ProductStoreRequest extends FormRequest
                 'string',
                 'max:500',
             ],
+            'youtube_video_url' => [
+                'nullable',
+                'string',
+                'max:500',
+                'url',
+            ],
             'price' => [
                 'required',
                 'numeric',

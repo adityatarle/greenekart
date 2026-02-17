@@ -300,6 +300,9 @@ class ProductController extends Controller
                 'manage_stock' => 'boolean',
                 'primary_image' => 'nullable|image|max:2048',
                 'gallery_images.*' => 'nullable|image|max:2048',
+                'specifications' => 'nullable|array',
+                'specifications.*.key' => 'nullable|string|max:255',
+                'specifications.*.value' => 'nullable|string|max:500',
             ]);
             
             $data = $validated;
@@ -390,22 +393,18 @@ class ProductController extends Controller
             unset($data['brand_custom']); // Remove the custom field
             
             // Handle specifications - filter out empty rows and format as array
-            if ($request->has('specifications') && is_array($request->specifications)) {
-                $specifications = [];
-                foreach ($request->specifications as $spec) {
-                    if (!empty($spec['key']) && !empty($spec['value'])) {
-                        $specifications[] = [
-                            'key' => trim($spec['key']),
-                            'value' => trim($spec['value'])
-                        ];
+            $specifications = [];
+            if (!empty($data['specifications']) && is_array($data['specifications'])) {
+                foreach ($data['specifications'] as $spec) {
+                    $key = trim($spec['key'] ?? $spec['name'] ?? '');
+                    $value = trim($spec['value'] ?? '');
+                    if ($key !== '' && $value !== '') {
+                        $specifications[] = ['key' => $key, 'value' => $value];
                     }
                 }
-                $data['specifications'] = !empty($specifications) ? $specifications : null;
-            } elseif ($request->has('specifications')) {
-                // If specifications field exists but is empty, set to null
-                $data['specifications'] = null;
             }
-            
+            $data['specifications'] = !empty($specifications) ? $specifications : null;
+
             // Update the product
             $product->update($data);
             

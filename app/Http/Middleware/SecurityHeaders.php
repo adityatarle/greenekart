@@ -50,7 +50,7 @@ class SecurityHeaders
             "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
             "img-src 'self' data: https: blob:",
             "connect-src 'self' https://api.razorpay.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
-            "frame-src 'self' https://api.razorpay.com https://www.google.com/recaptcha/",
+            "frame-src 'self' https://api.razorpay.com https://www.google.com/recaptcha/ https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com",
             "object-src 'none'",
             "base-uri 'self'",
             "form-action 'self'",

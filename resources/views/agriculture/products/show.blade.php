@@ -8,9 +8,9 @@
     @php
         $mainImageUrl = \App\Helpers\ImageHelper::productImageUrl($product);
     @endphp
-    <div class="row g-4">
-        <!-- Product Images -->
-        <div class="col-lg-6">
+    <div class="row g-4 product-detail-row">
+        <!-- Product Images (sticky left) -->
+        <div class="col-lg-6 product-images-col">
             <div class="product-image-main mb-3">
                 <div class="image-wrapper">
                     @auth
@@ -110,15 +110,23 @@
                     if (is_string($specifications)) {
                         $specifications = json_decode($specifications, true) ?? [];
                     }
+                    // Normalize: ensure each spec has 'key' and 'value' (support legacy 'name' for key)
+                    if (is_array($specifications)) {
+                        $specifications = array_values(array_filter(array_map(function ($spec) {
+                            if (!is_array($spec)) return null;
+                            $key = trim($spec['key'] ?? $spec['name'] ?? '');
+                            $value = trim($spec['value'] ?? '');
+                            if ($key === '') return null;
+                            return ['key' => $key, 'value' => $value];
+                        }, $specifications)));
+                    }
                 @endphp
                 @if(!empty($specifications) && is_array($specifications))
                 <div class="product-specifications-card mb-3">
                     <h6 class="section-title">Specifications</h6>
                     <ul class="specifications-list">
                         @foreach($specifications as $spec)
-                        @if(!empty($spec['key']))
                         <li><strong>{{ $spec['key'] }}:</strong> {{ $spec['value'] ?? '' }}</li>
-                        @endif
                         @endforeach
                     </ul>
                 </div>
@@ -131,16 +139,15 @@
                 </div>
                 @endif
 
-                @if($product->youtube_video_id)
-                <div class="product-video-card mb-3">
+                @if($product->youtube_video_url)
+                <div class="product-youtube-button-wrap mb-3">
                     <h6 class="section-title">Product Video</h6>
-                    <div class="video-wrapper">
-                        <iframe src="https://www.youtube.com/embed/{{ $product->youtube_video_id }}?rel=0" 
-                                title="Product video" 
-                                frameborder="0" 
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                allowfullscreen></iframe>
-                    </div>
+                    <a href="{{ $product->youtube_video_url }}" target="_blank" rel="noopener noreferrer" class="btn-youtube">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                        Watch on YouTube
+                    </a>
                 </div>
                 @endif
                 
@@ -508,8 +515,19 @@
     margin-bottom: 0;
 }
 
-/* Product Video (YouTube embed) */
-.product-video-card {
+/* Sticky left column: product images stay in place while right side scrolls */
+@media (min-width: 992px) {
+    .product-detail-row {
+        align-items: flex-start;
+    }
+    .product-images-col {
+        position: sticky;
+        top: 90px;
+    }
+}
+
+/* YouTube button (link only, no embed) */
+.product-youtube-button-wrap {
     background: #fff;
     border-radius: 10px;
     padding: 16px;
@@ -517,22 +535,29 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-.video-wrapper {
-    position: relative;
-    width: 100%;
-    padding-bottom: 56.25%; /* 16:9 */
-    height: 0;
-    overflow: hidden;
+.btn-youtube {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: #ff0000;
+    color: #fff !important;
     border-radius: 8px;
-    background: #000;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s;
+    border: none;
 }
 
-.video-wrapper iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+.btn-youtube:hover {
+    background: #cc0000;
+    color: #fff !important;
+    transform: translateY(-1px);
+}
+
+.btn-youtube svg {
+    flex-shrink: 0;
 }
 
 /* Add to Cart */

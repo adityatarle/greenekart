@@ -5,113 +5,81 @@
 
 @push('styles')
 <style>
-.clickable-card {
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-.clickable-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-.clickable-card a {
+.admin-stat-link {
     color: inherit;
     text-decoration: none;
+    display: block;
+}
+.admin-stat-link:hover { color: inherit; }
+.admin-stat-icon {
+    font-size: 1.25rem;
+    opacity: 0.6;
 }
 </style>
 @endpush
 
 @section('content')
 <!-- Main Statistics Cards -->
-<div class="row mb-4">
-    <div class="col-xl-3 col-md-6 mb-4">
-        <a href="{{ route('admin.products.index') }}" class="text-decoration-none">
-            <div class="card stat-card border-left-primary clickable-card">
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <a href="{{ route('admin.products.index') }}" class="admin-stat-link">
+            <div class="card stat-card border-left-primary h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="stat-number">{{ $stats['total_products'] }}</div>
                             <div class="stat-label">Total Products</div>
                             <small class="text-muted">{{ $stats['active_products'] }} active</small>
                         </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-tractor fa-2x opacity-75"></i>
-                        </div>
+                        <i class="fas fa-box admin-stat-icon"></i>
                     </div>
                 </div>
             </div>
         </a>
     </div>
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-        <a href="{{ route('admin.customers.index') }}" class="text-decoration-none">
-            <div class="card stat-card border-left-success clickable-card">
+    <div class="col-xl-3 col-md-6">
+        <a href="{{ route('admin.customers.index') }}" class="admin-stat-link">
+            <div class="card stat-card border-left-success h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="stat-number">{{ $stats['total_customers'] }}</div>
                             <div class="stat-label">Total Customers</div>
-                            <small class="text-muted">Registered customers</small>
+                            <small class="text-muted">Registered</small>
                         </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-users fa-2x opacity-75"></i>
-                        </div>
+                        <i class="fas fa-users admin-stat-icon"></i>
                     </div>
                 </div>
             </div>
         </a>
     </div>
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-        <a href="{{ route('admin.dealers.index') }}" class="text-decoration-none">
-            <div class="card stat-card border-left-info clickable-card">
+    <div class="col-xl-3 col-md-6">
+        <a href="{{ route('admin.dealers.index') }}" class="admin-stat-link">
+            <div class="card stat-card border-left-info h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="stat-number">{{ $stats['total_dealers'] }}</div>
                             <div class="stat-label">Total Dealers</div>
                             <small class="text-muted">{{ $stats['approved_dealers'] }} approved</small>
                         </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-user-tie fa-2x opacity-75"></i>
-                        </div>
+                        <i class="fas fa-user-tie admin-stat-icon"></i>
                     </div>
                 </div>
             </div>
         </a>
     </div>
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-        <a href="{{ route('admin.orders.index') }}" class="text-decoration-none">
-            <div class="card stat-card border-left-primary clickable-card">
+    <div class="col-xl-3 col-md-6">
+        <a href="{{ route('admin.orders.index') }}" class="admin-stat-link">
+            <div class="card stat-card border-left-primary h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="stat-number">{{ $stats['total_orders'] }}</div>
                             <div class="stat-label">Total Orders</div>
                             <small class="text-muted">{{ $stats['pending_orders'] }} pending</small>
                         </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-shopping-cart fa-2x opacity-75"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-        <a href="{{ route('admin.reports.sales') }}" class="text-decoration-none">
-            <div class="card stat-card border-left-warning clickable-card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <div class="stat-number">{{ $currencySymbol ?? '₹' }}{{ number_format($stats['total_revenue'] ?? 0, 2) }}</div>
-                            <div class="stat-label">Total Revenue</div>
-                            <small class="text-muted">{{ $currencySymbol ?? '₹' }}{{ number_format($stats['monthly_revenue'] ?? 0, 2) }} this month</small>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-rupee-sign fa-2x opacity-75"></i>
-                        </div>
+                        <i class="fas fa-shopping-cart admin-stat-icon"></i>
                     </div>
                 </div>
             </div>
@@ -119,78 +87,85 @@
     </div>
 </div>
 
-<!-- Secondary Statistics Cards -->
-<div class="row mb-4">
-    <div class="col-xl-3 col-md-6 mb-4">
-        <a href="{{ route('admin.dealers.index') }}?status=pending" class="text-decoration-none">
-            <div class="card stat-card border-left-danger clickable-card">
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <a href="{{ route('admin.reports.sales') }}" class="admin-stat-link">
+            <div class="card stat-card border-left-warning h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-number">{{ $currencySymbol ?? '₹' }}{{ number_format($stats['total_revenue'] ?? 0, 2) }}</div>
+                            <div class="stat-label">Total Revenue</div>
+                            <small class="text-muted">{{ $currencySymbol ?? '₹' }}{{ number_format($stats['monthly_revenue'] ?? 0, 2) }} this month</small>
+                        </div>
+                        <i class="fas fa-rupee-sign admin-stat-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+<!-- Secondary Statistics Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <a href="{{ route('admin.dealers.index') }}?status=pending" class="admin-stat-link">
+            <div class="card stat-card border-left-danger h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="stat-number">{{ $stats['pending_dealer_registrations'] }}</div>
                             <div class="stat-label">Pending Dealer Approvals</div>
                             <small class="text-muted">{{ $stats['approved_dealers'] }} approved</small>
                         </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-user-clock fa-2x opacity-75"></i>
-                        </div>
+                        <i class="fas fa-user-clock admin-stat-icon"></i>
                     </div>
                 </div>
             </div>
         </a>
     </div>
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-        <a href="{{ route('admin.reports.inventory') }}" class="text-decoration-none">
-            <div class="card stat-card border-left-warning clickable-card">
+    <div class="col-xl-3 col-md-6">
+        <a href="{{ route('admin.reports.inventory') }}" class="admin-stat-link">
+            <div class="card stat-card border-left-warning h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="stat-number">{{ $stats['low_stock_products'] }}</div>
                             <div class="stat-label">Low Stock Alerts</div>
                             <small class="text-muted">{{ $stats['out_of_stock_products'] }} out of stock</small>
                         </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-exclamation-triangle fa-2x opacity-75"></i>
-                        </div>
+                        <i class="fas fa-exclamation-triangle admin-stat-icon"></i>
                     </div>
                 </div>
             </div>
         </a>
     </div>
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-        <a href="{{ route('admin.orders.index') }}?status=confirmed" class="text-decoration-none">
-            <div class="card stat-card border-left-info clickable-card">
+    <div class="col-xl-3 col-md-6">
+        <a href="{{ route('admin.orders.index') }}?status=confirmed" class="admin-stat-link">
+            <div class="card stat-card border-left-info h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="stat-number">{{ $stats['confirmed_orders'] }}</div>
                             <div class="stat-label">Confirmed Orders</div>
                             <small class="text-muted">{{ $stats['shipped_orders'] }} shipped</small>
                         </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-check-circle fa-2x opacity-75"></i>
-                        </div>
+                        <i class="fas fa-check-circle admin-stat-icon"></i>
                     </div>
                 </div>
             </div>
         </a>
     </div>
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-        <a href="{{ route('admin.orders.index') }}?status=delivered" class="text-decoration-none">
-            <div class="card stat-card border-left-success clickable-card">
+    <div class="col-xl-3 col-md-6">
+        <a href="{{ route('admin.orders.index') }}?status=delivered" class="admin-stat-link">
+            <div class="card stat-card border-left-success h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="stat-number">{{ $stats['delivered_orders'] }}</div>
                             <div class="stat-label">Delivered Orders</div>
                             <small class="text-muted">{{ $stats['cancelled_orders'] }} cancelled</small>
                         </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-truck fa-2x opacity-75"></i>
-                        </div>
+                        <i class="fas fa-truck admin-stat-icon"></i>
                     </div>
                 </div>
             </div>
@@ -199,9 +174,9 @@
 </div>
 
 <!-- Charts Row -->
-<div class="row mb-4">
+<div class="row g-3 mb-4">
     <div class="col-xl-8 col-lg-7">
-        <div class="card">
+        <div class="card h-100">
             <div class="card-header">
                 <h5 class="card-title mb-0">Revenue Trends (Last 12 Months)</h5>
             </div>
@@ -212,9 +187,8 @@
             </div>
         </div>
     </div>
-    
     <div class="col-xl-4 col-lg-5">
-        <div class="card">
+        <div class="card h-100">
             <div class="card-header">
                 <h5 class="card-title mb-0">Orders by Status</h5>
             </div>
@@ -228,7 +202,7 @@
 </div>
 
 <!-- Management Sections -->
-<div class="row mb-4">
+<div class="row g-3 mb-4">
     <!-- Recent Orders -->
     <div class="col-xl-8 col-lg-7">
         <div class="card">
@@ -297,42 +271,37 @@
         </div>
     </div>
     
-    <!-- Top Selling Products -->
     <div class="col-xl-4 col-lg-5">
-        <div class="card">
+        <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="card-title mb-0">Top Selling Products</h5>
-                <a href="{{ route('admin.products.index') }}" class="btn btn-sm btn-primary">Manage</a>
+                <a href="{{ route('admin.products.index') }}" class="btn btn-sm btn-outline-primary">Manage</a>
             </div>
             <div class="card-body">
                 @forelse($topSellingProducts as $product)
-                <div class="d-flex align-items-center mb-3">
-                    <div class="me-3">
+                <div class="d-flex align-items-center mb-3 pb-3 border-bottom border-light">
+                    <div class="me-3 flex-shrink-0">
                         @php
                             $productImageUrl = \App\Helpers\ImageHelper::productImageUrl($product);
                         @endphp
-                        <img src="{{ $productImageUrl }}" 
-                             alt="{{ $product->name }}" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                        <img src="{{ $productImageUrl }}" alt="{{ $product->name }}" class="rounded" style="width: 36px; height: 36px; object-fit: cover;">
                     </div>
-                    <div class="flex-grow-1">
-                        <h6 class="mb-1">{{ $product->name }}</h6>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="text-truncate small fw-semibold">{{ $product->name }}</div>
                         <small class="text-muted">{{ $product->order_items_count ?? 0 }} orders</small>
                     </div>
-                    <div class="text-end">
-                        <span class="badge bg-primary">{{ $currencySymbol ?? '₹' }}{{ number_format($product->price ?? 0, 2) }}</span>
-                    </div>
+                    <span class="badge bg-primary flex-shrink-0">{{ $currencySymbol ?? '₹' }}{{ number_format($product->price ?? 0, 2) }}</span>
                 </div>
                 @empty
-                <p class="text-muted text-center">No products found</p>
+                <p class="text-muted text-center small mb-0">No products found</p>
                 @endforelse
             </div>
         </div>
     </div>
 </div>
 
-<!-- Dealer Management Section -->
 @if($recentDealerRegistrations->count() > 0)
-<div class="row mb-4">
+<div class="row g-3 mb-4">
     <div class="col-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -391,13 +360,12 @@
 </div>
 @endif
 
-<!-- Low Stock Alerts -->
 @if($lowStockProducts->count() > 0)
-<div class="row mb-4">
+<div class="row g-3 mb-4">
     <div class="col-12">
         <div class="card border-warning">
-            <div class="card-header bg-warning text-dark">
-                <h5 class="card-title mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Low Stock Alerts</h5>
+            <div class="card-header bg-warning text-dark py-2">
+                <h5 class="card-title mb-0 small"><i class="fas fa-exclamation-triangle me-2"></i>Low Stock Alerts</h5>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -439,37 +407,32 @@
 </div>
 @endif
 
-<!-- Recent Customers -->
-<div class="row mb-4">
+<div class="row g-3 mb-4">
     <div class="col-xl-6">
-        <div class="card">
+        <div class="card h-100">
             <div class="card-header">
                 <h5 class="card-title mb-0">Recent Customers</h5>
             </div>
             <div class="card-body">
                 @forelse($recentCustomers as $customer)
-                <div class="d-flex align-items-center mb-3">
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                <div class="d-flex align-items-center py-2 border-bottom border-light">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 34px; height: 34px; font-size: 0.8rem;">
                         <i class="fas fa-user"></i>
                     </div>
-                    <div class="flex-grow-1">
-                        <h6 class="mb-1">{{ $customer->name }}</h6>
-                        <small class="text-muted">{{ $customer->email }}</small>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="small fw-500">{{ $customer->name }}</div>
+                        <small class="text-muted text-truncate d-block">{{ $customer->email }}</small>
                     </div>
-                    <div class="text-end">
-                        <small class="text-muted">{{ $customer->created_at->format('M d, Y') }}</small>
-                    </div>
+                    <small class="text-muted flex-shrink-0">{{ $customer->created_at->format('M d, Y') }}</small>
                 </div>
                 @empty
-                <p class="text-muted text-center">No customers found</p>
+                <p class="text-muted text-center small mb-0">No customers found</p>
                 @endforelse
             </div>
         </div>
     </div>
-    
-    <!-- Category Distribution -->
     <div class="col-xl-6">
-        <div class="card">
+        <div class="card h-100">
             <div class="card-header">
                 <h5 class="card-title mb-0">Category Distribution</h5>
             </div>

@@ -314,7 +314,7 @@
           <!-- Logo Section -->
           <div class="header-logo">
             <a href="{{ route('agriculture.home') }}" class="logo-link d-flex align-items-center">
-              <img src="{{ asset('assets/logo/logo.png') }}" alt="Greenleaf" class="logo-img" style="max-height: 72px; width: auto;">
+              <img src="{{ asset('assets/logo/logo.png') }}" alt="Greenleaf" class="logo-img" style="max-height: 56px; width: auto;">
             </a>
             <button class="mobile-menu-toggle d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use xlink:href="#menu"></use></svg>
@@ -447,102 +447,89 @@
     </header>
     
     <style>
-    /* Categories Sub Navigation */
+    /* Categories Sub Navigation – compact */
     .categories-subnav {
-        background: #f8faf8;
-        border-bottom: 1px solid #e8efe8;
+        background: #fafbfa;
+        border-bottom: 1px solid #e8ece8;
         padding: 0;
     }
-    
     .categories-nav-wrapper {
         display: flex;
         align-items: center;
         gap: 0;
         position: relative;
     }
-    
     .category-nav-btn {
         flex-shrink: 0;
-        width: 40px;
-        height: 40px;
+        width: 28px;
+        height: 28px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #ffffff;
-        border: 1px solid #e0e8e0;
+        background: #fff;
+        border: 1px solid #e2e8e2;
         border-radius: 50%;
-        color: #495057;
+        color: #5a6a5a;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: background 0.2s, color 0.2s, border-color 0.2s;
         z-index: 2;
     }
-    
     .category-nav-btn:hover {
         background: #6BB252;
-        color: #ffffff;
+        color: #fff;
         border-color: #6BB252;
     }
-    
     .category-nav-btn:disabled {
         opacity: 0.4;
         cursor: not-allowed;
         pointer-events: none;
     }
-    
     .categories-scroll {
         flex: 1;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         overflow-x: auto;
-        padding: 10px 12px;
+        padding: 6px 10px;
         scrollbar-width: none;
         -ms-overflow-style: none;
         scroll-behavior: smooth;
     }
-    
-    .categories-scroll::-webkit-scrollbar {
-        display: none;
-    }
-    
+    .categories-scroll::-webkit-scrollbar { display: none; }
     .category-link {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 8px 16px;
-        background: #ffffff;
-        border: 1px solid #e0e8e0;
-        border-radius: 25px;
-        color: #495057;
-        font-size: 0.85rem;
+        gap: 5px;
+        padding: 5px 12px;
+        background: #fff;
+        border: 1px solid #e2e8e2;
+        border-radius: 999px;
+        color: #5a6a5a;
+        font-size: 0.8rem;
         font-weight: 500;
         text-decoration: none;
         white-space: nowrap;
-        transition: all 0.2s ease;
+        transition: background 0.2s, border-color 0.2s, color 0.2s;
     }
-    
     .category-link:hover {
-        background: #e8f5e3;
+        background: #eef5ec;
         border-color: #6BB252;
         color: #2d5a27;
     }
-    
     .category-link.active {
-        background: linear-gradient(135deg, #6BB252 0%, #5a9a45 100%);
+        background: #6BB252;
         border-color: #6BB252;
-        color: #ffffff;
+        color: #fff;
     }
-    
     .category-link.view-all {
         background: transparent;
         border-color: transparent;
         color: #6BB252;
         font-weight: 600;
     }
-    
     .category-link.view-all:hover {
-        background: #e8f5e3;
-        border-color: #e8f5e3;
+        background: #eef5ec;
+        border-color: transparent;
     }
     </style>
     <script>

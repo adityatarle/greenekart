@@ -20,18 +20,22 @@ class SubcategoryController extends Controller
     public function index(Request $request)
     {
         $query = AgricultureSubcategory::with('category')->withCount('products');
-        
-        // Filter by category if provided
+
         if ($request->filled('category_id')) {
             $query->where('agriculture_category_id', $request->category_id);
         }
-        
-        $subcategories = $query->orderBy('sort_order')
-            ->orderBy('name')
-            ->paginate(20);
-        
+
+        if ($request->filled('search')) {
+            $term = $request->search;
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'like', "%{$term}%")
+                  ->orWhere('description', 'like', "%{$term}%");
+            });
+        }
+
+        $subcategories = $query->orderBy('sort_order')->orderBy('name')->paginate(20)->withQueryString();
         $categories = AgricultureCategory::active()->get();
-        
+
         return view('admin.subcategories.index', compact('subcategories', 'categories'));
     }
 

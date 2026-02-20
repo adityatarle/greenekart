@@ -16,12 +16,19 @@ class CategoryController extends Controller
     {
         $this->fileUploadService = $fileUploadService;
     }
-    public function index()
+    public function index(Request $request)
     {
-        $categories = AgricultureCategory::withCount('products')
-            ->orderBy('sort_order')
-            ->orderBy('name')
-            ->paginate(20);
+        $query = AgricultureCategory::withCount('products');
+
+        if ($request->filled('search')) {
+            $term = $request->search;
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'like', "%{$term}%")
+                  ->orWhere('description', 'like', "%{$term}%");
+            });
+        }
+
+        $categories = $query->orderBy('sort_order')->orderBy('name')->paginate(20)->withQueryString();
 
         return view('admin.categories.index', compact('categories'));
     }

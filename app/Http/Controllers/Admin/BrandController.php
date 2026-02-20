@@ -12,12 +12,19 @@ class BrandController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $brands = Brand::withCount('products')
-            ->orderBy('sort_order')
-            ->orderBy('name')
-            ->paginate(20);
+        $query = Brand::withCount('products');
+
+        if ($request->filled('search')) {
+            $term = $request->search;
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'like', "%{$term}%")
+                  ->orWhere('description', 'like', "%{$term}%");
+            });
+        }
+
+        $brands = $query->orderBy('sort_order')->orderBy('name')->paginate(20)->withQueryString();
 
         return view('admin.brands.index', compact('brands'));
     }

@@ -16,19 +16,21 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <!-- Filter by Category -->
-                    <div class="mb-3">
-                        <form method="GET" action="{{ route('admin.subcategories.index') }}" class="d-flex gap-2">
-                            <select name="category_id" class="form-select" style="max-width: 300px;" onchange="this.form.submit()">
+                    <form method="GET" action="{{ route('admin.subcategories.index') }}" class="mb-3">
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <input type="text" name="search" class="form-control" style="max-width: 280px;" placeholder="Search by name or description..." value="{{ request('search') }}">
+                            <select name="category_id" class="form-select" style="max-width: 220px;" onchange="this.form.submit()">
                                 <option value="">All Categories</option>
                                 @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
-                                    </option>
+                                    <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
                                 @endforeach
                             </select>
-                        </form>
-                    </div>
+                            <button type="submit" class="btn btn-outline-primary"><i class="fas fa-search"></i> Search</button>
+                            @if(request('search') || request('category_id'))
+                                <a href="{{ route('admin.subcategories.index') }}" class="btn btn-outline-secondary">Clear</a>
+                            @endif
+                        </div>
+                    </form>
 
                     @if($subcategories->count() > 0)
                         <div class="table-responsive">

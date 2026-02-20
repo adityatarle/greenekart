@@ -3,16 +3,6 @@
 @section('title', 'Edit Product')
 @section('page-title', 'Edit Product')
 
-@push('styles')
-<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.css" rel="stylesheet">
-<style>
-/* Summernote + Bootstrap 5: show toolbar and fix dropdowns */
-.note-editor.note-frame { display: block !important; }
-.note-toolbar { display: flex !important; flex-wrap: wrap; }
-.note-btn.dropdown-toggle::after { content: none; }
-</style>
-@endpush
-
 @section('content')
 <div class="row">
     <div class="col-lg-8">
@@ -317,8 +307,7 @@
 
                     <div class="mb-3">
                         <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control @error('description') is-invalid @enderror" 
-                                  id="description" name="description" rows="8">{{ old('description', $product->description) }}</textarea>
+                        <textarea id="description" name="description" class="form-control @error('description') is-invalid @enderror" rows="8">{{ old('description', $product->description) }}</textarea>
                         @error('description')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -532,37 +521,6 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.js"></script>
-<script>
-(function() {
-    function initSummernote() {
-        if (typeof jQuery === 'undefined' || !jQuery.fn.summernote) return;
-        var $desc = jQuery('#description');
-        if (!$desc.length) return;
-        $desc.summernote({
-            height: 280,
-            toolbar: [
-                ['style', ['style']],
-                ['font', ['bold', 'italic', 'underline', 'clear']],
-                ['fontname', ['fontname']],
-                ['color', ['color']],
-                ['para', ['ul', 'ol', 'paragraph']],
-                ['table', ['table']],
-                ['insert', ['link']],
-                ['view', ['fullscreen', 'codeview', 'help']]
-            ],
-            placeholder: 'Enter product description with formatting, lists, and links...'
-        });
-        // Bootstrap 5 dropdown fix: Summernote uses data-toggle, BS5 uses data-bs-toggle
-        jQuery('.note-toolbar [data-toggle="dropdown"]').attr('data-bs-toggle', 'dropdown').removeAttr('data-toggle');
-    }
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() { setTimeout(initSummernote, 50); });
-    } else {
-        setTimeout(initSummernote, 50);
-    }
-})();
-</script>
 <script>
 // Image Preview for Primary Image
 document.getElementById('primary_image').addEventListener('change', function(e) {

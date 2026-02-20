@@ -1,138 +1,217 @@
-    <footer class="bg-dark footer-compact" style="background-color: #0d3d2e !important;">
+    <footer class="site-footer">
       <div class="container-lg">
-        <div class="row">
+        <div class="footer-grid">
 
-          <!-- First column - Greenleaf logo + description + social icons -->
-          <div class="col-lg-3 col-md-6 col-sm-6 mb-4 mb-lg-0">
-            <div class="footer-menu">
-              <a href="{{ route('agriculture.home') }}" class="d-inline-flex align-items-center mb-3">
-                <img src="{{ asset('assets/logo/logo.png') }}" alt="Greenleaf" style="max-height: 72px; width: auto;">
-              </a>
-
-              <!-- Short company description -->
-              <p class="text-white-75 small mt-2 mb-4" style="line-height: 1.5;">
-                Your trusted partner for premium farm & garden tools and equipment in India.
-              </p>
-
-              <!-- Social icons using Font Awesome Brands -->
-                    <div class="social-links d-flex gap-4">
-                        <a href="#" class="text-success fs-4 hover-opacity" aria-label="Facebook">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="text-success fs-4 hover-opacity" aria-label="X (Twitter)">
-                            <i class="fab fa-x-twitter"></i>
-                        </a>
-                        <a href="#" class="text-success fs-4 hover-opacity" aria-label="YouTube">
-                            <i class="fab fa-youtube"></i>
-                        </a>
-                        <a href="#" class="text-success fs-4 hover-opacity" aria-label="Instagram">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="text-success fs-4 hover-opacity" aria-label="Amazon">
-                            <i class="fab fa-amazon"></i>
-                        </a>
-                    </div>
+          <div class="footer-brand">
+            <a href="{{ route('agriculture.home') }}" class="footer-logo">
+              <img src="{{ asset('assets/logo/logo.png') }}" alt="Greenleaf">
+            </a>
+            <p class="footer-tagline">
+              Your trusted partner for premium farm & garden tools and equipment in India.
+            </p>
+            <div class="footer-social">
+              <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+              <a href="#" aria-label="X (Twitter)"><i class="fab fa-x-twitter"></i></a>
+              <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+              <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+              <a href="#" aria-label="Amazon"><i class="fab fa-amazon"></i></a>
             </div>
           </div>
 
-          <!-- Company -->
-          <div class="col-md-2 col-sm-6 mb-4 mb-md-0">
-            <div class="footer-menu">
-              <h5 class="widget-title text-success mb-4">Company</h5>
-              <ul class="menu-list list-unstyled small text-white-75">
-                <li class="menu-item mb-2">
-                  <a href="{{ route('about') }}" class="nav-link text-reset text-decoration-none">About Us</a>
-                </li>
-                <li class="menu-item mb-2">
-                  <a href="{{ route('contact') }}" class="nav-link text-reset text-decoration-none">Contact</a>
-                </li>
-                <li class="menu-item mb-2">
-                  <a href="{{ route('terms') }}" class="nav-link text-reset text-decoration-none">Terms of Service</a>
-                </li>
-                <li class="menu-item mb-2">
-                  <a href="{{ route('privacy') }}" class="nav-link text-reset text-decoration-none">Privacy Policy</a>
-                </li>
-                <li class="menu-item mb-2">
-                  <a href="{{ route('refund') }}" class="nav-link text-reset text-decoration-none">Refund & Cancellation</a>
-                </li>
-              </ul>
-            </div>
+          <div class="footer-col">
+            <h6 class="footer-heading">Company</h6>
+            <ul class="footer-links">
+              <li><a href="{{ route('about') }}">About Us</a></li>
+              <li><a href="{{ route('contact') }}">Contact</a></li>
+              <li><a href="{{ route('terms') }}">Terms of Service</a></li>
+              <li><a href="{{ route('privacy') }}">Privacy Policy</a></li>
+              <li><a href="{{ route('refund') }}">Refund & Cancellation</a></li>
+            </ul>
           </div>
 
-          <!-- Shop -->
-          <div class="col-md-2 col-sm-6 mb-4 mb-md-0">
-            <div class="footer-menu">
-              <h5 class="widget-title text-success mb-4">Shop</h5>
-              <ul class="menu-list list-unstyled small text-white-75">
-                <li class="menu-item mb-2"><a href="{{ route('agriculture.products.index') }}" class="nav-link text-reset text-decoration-none">All Products</a></li>
-                <li class="menu-item mb-2"><a href="{{ route('agriculture.categories.index') }}" class="nav-link text-reset text-decoration-none">Categories</a></li>
-                <li class="menu-item mb-2"><a href="{{ route('agriculture.products.index', ['filter' => 'featured']) }}" class="nav-link text-reset text-decoration-none">Featured Products</a></li>
-                <li class="menu-item mb-2"><a href="{{ route('agriculture.products.index', ['sort' => 'new_arrivals']) }}" class="nav-link text-reset text-decoration-none">New Arrivals</a></li>
-                <li class="menu-item mb-2"><a href="{{ route('agriculture.products.index', ['sort' => 'best_selling']) }}" class="nav-link text-reset text-decoration-none">Best Sellers</a></li>
-              </ul>
-            </div>
+          <div class="footer-col">
+            <h6 class="footer-heading">Shop</h6>
+            <ul class="footer-links">
+              <li><a href="{{ route('agriculture.products.index') }}">All Products</a></li>
+              <li><a href="{{ route('agriculture.categories.index') }}">Categories</a></li>
+              <li><a href="{{ route('agriculture.products.index', ['filter' => 'featured']) }}">Featured</a></li>
+              <li><a href="{{ route('agriculture.products.index', ['sort' => 'new_arrivals']) }}">New Arrivals</a></li>
+              <li><a href="{{ route('agriculture.products.index', ['sort' => 'best_selling']) }}">Best Sellers</a></li>
+            </ul>
           </div>
 
-          <!-- Account -->
-          <div class="col-md-2 col-sm-6 mb-4 mb-md-0">
-            <div class="footer-menu">
-              <h5 class="widget-title text-success mb-4">Account</h5>
-              <ul class="menu-list list-unstyled small text-white-75">
-                @auth
-                @if(auth()->user()->role === 'admin')
-                <li class="menu-item mb-2"><a href="{{ route('admin.dashboard') }}" class="nav-link text-reset text-decoration-none">Admin Dashboard</a></li>
-                @elseif(auth()->user()->role === 'dealer')
-                <li class="menu-item mb-2"><a href="{{ route('dealer.dashboard') }}" class="nav-link text-reset text-decoration-none">Dealer Dashboard</a></li>
-                @else
-                <li class="menu-item mb-2"><a href="{{ route('customer.dashboard') }}" class="nav-link text-reset text-decoration-none">My Dashboard</a></li>
-                @endif
-                <li class="menu-item mb-2"><a href="{{ route('agriculture.wishlist.index') }}" class="nav-link text-reset text-decoration-none">My Wishlist</a></li>
-                <li class="menu-item mb-2"><a href="{{ route('agriculture.cart.index') }}" class="nav-link text-reset text-decoration-none">Shopping Cart</a></li>
-                <li class="menu-item mb-2">
-                  <form action="{{ route('auth.logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="nav-link btn btn-link p-0 text-start text-reset text-decoration-none">Logout</button>
-                  </form>
-                </li>
-                @else
-                <li class="menu-item mb-2"><a href="{{ route('auth.login') }}" class="nav-link text-reset text-decoration-none">Login</a></li>
-                <li class="menu-item mb-2"><a href="{{ route('auth.register') }}" class="nav-link text-reset text-decoration-none">Register</a></li>
-                <li class="menu-item mb-2"><a href="{{ route('dealer.register') }}" class="nav-link text-reset text-decoration-none">Become a Dealer</a></li>
-                @endauth
-              </ul>
-            </div>
+          <div class="footer-col">
+            <h6 class="footer-heading">Account</h6>
+            <ul class="footer-links">
+              @auth
+              @if(auth()->user()->role === 'admin')
+              <li><a href="{{ route('admin.dashboard') }}">Admin Dashboard</a></li>
+              @elseif(auth()->user()->role === 'dealer')
+              <li><a href="{{ route('dealer.dashboard') }}">Dealer Dashboard</a></li>
+              @else
+              <li><a href="{{ route('customer.dashboard') }}">My Dashboard</a></li>
+              @endif
+              <li><a href="{{ route('agriculture.wishlist.index') }}">Wishlist</a></li>
+              <li><a href="{{ route('agriculture.cart.index') }}">Cart</a></li>
+              <li>
+                <form action="{{ route('auth.logout') }}" method="POST" class="d-inline">
+                  @csrf
+                  <button type="submit" class="footer-link-btn">Logout</button>
+                </form>
+              </li>
+              @else
+              <li><a href="{{ route('auth.login') }}">Login</a></li>
+              <li><a href="{{ route('auth.register') }}">Register</a></li>
+              <li><a href="{{ route('dealer.register') }}">Become a Dealer</a></li>
+              @endauth
+            </ul>
           </div>
 
-          <!-- Get In Touch -->
-          <div class="col-lg-3 col-md-6 col-sm-6 mb-4 mb-lg-0">
-            <div class="footer-menu">
-              <h5 class="widget-title text-primary mb-4">Get In Touch</h5>
-              <p class="small text-white-75">Have questions? Contact our support team for assistance with your orders and products.</p>
-              <div class="mt-3">
-                <a href="{{ route('contact') }}" class="btn btn-outline-success w-100">Contact Support</a>
-              </div>
-              <div class="mt-4 small text-white-75">
-                <p class="mb-1 fw-bold">Admin Login</p>
-                <a href="{{ route('admin.login') }}" class="text-success text-decoration-none">Access Admin Panel →</a>
-              </div>
-            </div>
+          <div class="footer-col footer-cta">
+            <h6 class="footer-heading">Get In Touch</h6>
+            <p class="footer-desc">Questions? We’re here to help with orders and products.</p>
+            <a href="{{ route('contact') }}" class="footer-btn">Contact Support</a>
+            <p class="footer-admin">
+              <a href="{{ route('admin.login') }}">Admin Panel →</a>
+            </p>
           </div>
 
         </div>
 
-        <!-- Copyright -->
-        <div class="footer-bottom text-center text-white-50 border-top border-secondary small">
-          <div class="row">
-            <div class="col-md-12 copyright text-center">
-              <p class="mb-0">© {{ date('Y') }} <a href="#" class="text-white">Greenleaf</a> All rights reserved. | Developed by <a href="https://nexusdigisolutions.in/" target="_blank" rel="noopener noreferrer" class="text-white">Nexus Digi Solutions</a></p>
-            </div>
-          </div>
+        <div class="footer-bar">
+          <p>© {{ date('Y') }} <a href="{{ route('agriculture.home') }}">Greenleaf</a> · Developed by <a href="https://nexusdigisolutions.in/" target="_blank" rel="noopener noreferrer">Nexus Digi Solutions</a></p>
         </div>
       </div>
     </footer>
     <style>
-    .footer-compact { padding: 32px 0 0 0 !important; }
-    .footer-bottom { margin-top: 24px; padding: 16px 0 !important; }
+    .site-footer {
+      background: linear-gradient(180deg, #0f3328 0%, #0a241c 100%);
+      color: rgba(255,255,255,0.85);
+      padding: 28px 0 0;
+      border-top: 1px solid rgba(107, 178, 82, 0.15);
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr 1fr 1.2fr;
+      gap: 28px 24px;
+      padding-bottom: 20px;
+    }
+    @media (max-width: 992px) {
+      .footer-grid { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    @media (max-width: 576px) {
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 20px 16px; }
+    }
+    .footer-brand .footer-logo {
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    .footer-brand .footer-logo img {
+      max-height: 38px;
+      width: auto;
+      opacity: 0.95;
+    }
+    .footer-tagline {
+      font-size: 0.8rem;
+      line-height: 1.45;
+      color: rgba(255,255,255,0.65);
+      margin: 0 0 14px 0;
+      max-width: 240px;
+    }
+    .footer-social {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .footer-social a {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(107, 178, 82, 0.9);
+      font-size: 0.9rem;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.06);
+      transition: background 0.2s, color 0.2s;
+    }
+    .footer-social a:hover {
+      background: rgba(107, 178, 82, 0.2);
+      color: #8bc34a;
+    }
+    .footer-heading {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: rgba(107, 178, 82, 0.95);
+      margin: 0 0 10px 0;
+    }
+    .footer-links {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .footer-links li { margin-bottom: 6px; }
+    .footer-links a,
+    .footer-link-btn {
+      font-size: 0.825rem;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      transition: color 0.2s, padding-left 0.2s;
+    }
+    .footer-links a:hover,
+    .footer-link-btn:hover {
+      color: #8bc34a;
+    }
+    .footer-links a:hover { padding-left: 4px; }
+    .footer-cta .footer-desc {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.65);
+      margin: 0 0 12px 0;
+      line-height: 1.4;
+    }
+    .footer-btn {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border: 1px solid rgba(107, 178, 82, 0.6);
+      color: #8bc34a;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .footer-btn:hover {
+      background: rgba(107, 178, 82, 0.15);
+      color: #9ccc65;
+      border-color: #8bc34a;
+    }
+    .footer-admin { margin: 12px 0 0; font-size: 0.8rem; }
+    .footer-admin a {
+      color: rgba(107, 178, 82, 0.9);
+      text-decoration: none;
+    }
+    .footer-admin a:hover { color: #9ccc65; text-decoration: underline; }
+    .footer-bar {
+      padding: 12px 0;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      text-align: center;
+    }
+    .footer-bar p {
+      margin: 0;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.5);
+    }
+    .footer-bar a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+    }
+    .footer-bar a:hover { color: #8bc34a; }
     </style>
     <script src="{{ asset('assets/organic/js/jquery-1.11.0.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>

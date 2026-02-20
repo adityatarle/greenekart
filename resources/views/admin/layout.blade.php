@@ -8,6 +8,10 @@
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Summernote CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.css"
+          rel="stylesheet"
+          crossorigin="anonymous">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- jQuery (required for Summernote on product forms) -->
@@ -17,22 +21,31 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --sidebar-width: 250px;
-            --header-height: 60px;
-            --primary-color: #2c3e50;
-            --secondary-color: #34495e;
-            --accent-color: #3498db;
-            --text-color: #2c3e50;
-            --light-gray: #ecf0f1;
-            --border-color: #bdc3c7;
+            --sidebar-width: 240px;
+            --header-height: 56px;
+            --admin-bg: #f1f5f9;
+            --admin-sidebar: #0f172a;
+            --admin-sidebar-hover: rgba(255,255,255,0.06);
+            --admin-sidebar-active: rgba(107, 178, 82, 0.18);
+            --admin-accent: #6BB252;
+            --admin-accent-dark: #4d8a3a;
+            --admin-text: #1e293b;
+            --admin-text-muted: #64748b;
+            --admin-border: #e2e8f0;
+            --admin-card: #ffffff;
         }
         
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa;
-            color: var(--text-color);
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--admin-bg);
+            color: var(--admin-text);
+            font-size: 0.9375rem;
+            line-height: 1.5;
         }
         
         .sidebar {
@@ -41,262 +54,327 @@
             left: 0;
             height: 100vh;
             width: var(--sidebar-width);
-            background: #ffffff;
-            border-right: 1px solid var(--border-color);
+            background: var(--admin-sidebar);
             z-index: 1000;
-            transition: all 0.3s ease;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease;
         }
         
         .sidebar-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--border-color);
-            background: var(--light-gray);
+            padding: 18px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
         }
         
-        .sidebar-header h4 {
-            color: var(--text-color);
+        .sidebar-header img {
+            max-height: 36px;
+            width: auto;
+            border-radius: 6px;
+        }
+        
+        .sidebar-header .sidebar-title {
+            color: rgba(255,255,255,0.95);
             margin: 0;
             font-weight: 600;
-            font-size: 1.1rem;
+            font-size: 0.9rem;
+            letter-spacing: -0.02em;
         }
         
         .sidebar-nav {
-            padding: 20px 0;
+            padding: 12px 10px;
+            overflow-y: auto;
+            flex: 1;
         }
         
-        .nav-item {
-            margin: 2px 0;
+        .sidebar-nav .nav {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
         
-        .nav-link {
-            color: var(--text-color);
-            padding: 12px 20px;
+        .sidebar-nav .nav-item {
+            margin: 0;
+        }
+        
+        .sidebar-nav .nav-link {
+            color: rgba(255,255,255,0.72);
+            padding: 10px 12px;
             text-decoration: none;
             display: flex;
             align-items: center;
-            transition: all 0.3s ease;
-            border-radius: 0 25px 25px 0;
-            margin-right: 20px;
+            gap: 10px;
+            border-radius: 8px;
+            font-size: 0.875rem;
             font-weight: 500;
+            transition: background 0.15s, color 0.15s;
         }
         
-        .nav-link:hover {
-            color: var(--accent-color);
-            background: var(--light-gray);
-            transform: translateX(5px);
-        }
-        
-        .nav-link.active {
-            color: var(--accent-color);
-            background: var(--light-gray);
-            border-left: 3px solid var(--accent-color);
-        }
-        
-        .nav-link i {
-            margin-right: 12px;
-            width: 20px;
+        .sidebar-nav .nav-link i {
+            width: 18px;
             text-align: center;
-            color: var(--text-color);
+            font-size: 0.9rem;
+            opacity: 0.9;
         }
         
-        .nav-link:hover i,
-        .nav-link.active i {
-            color: var(--accent-color);
+        .sidebar-nav .nav-link:hover {
+            color: #fff;
+            background: var(--admin-sidebar-hover);
+        }
+        
+        .sidebar-nav .nav-link.active {
+            color: #fff;
+            background: var(--admin-sidebar-active);
+            color: #86efac;
+        }
+        
+        .sidebar-nav .nav-link.active i {
+            color: #86efac;
+        }
+        
+        .sidebar-nav .nav-item-external {
+            margin-top: 8px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.06);
         }
         
         .main-content {
             margin-left: var(--sidebar-width);
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         
         .header {
-            background: white;
             height: var(--header-height);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            background: var(--admin-card);
+            border-bottom: 1px solid var(--admin-border);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 30px;
-            border-bottom: 1px solid var(--border-color);
+            padding: 0 24px;
+            flex-shrink: 0;
+        }
+        
+        .header h5 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--admin-text);
+        }
+        
+        .header .dropdown .btn {
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border-color: var(--admin-border);
+            color: var(--admin-text);
+        }
+        
+        .header .dropdown .btn:hover {
+            background: var(--admin-bg);
+            border-color: var(--admin-border);
+            color: var(--admin-text);
         }
         
         .content {
-            padding: 30px;
+            padding: 24px;
+            flex: 1;
         }
         
         .card {
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
-            background: white;
+            border: 1px solid var(--admin-border);
+            border-radius: 10px;
+            background: var(--admin-card);
+            box-shadow: none;
         }
         
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        .card-header {
+            background: transparent;
+            border-bottom: 1px solid var(--admin-border);
+            padding: 14px 18px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--admin-text);
+        }
+        
+        .card-header .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .card-body {
+            padding: 18px;
         }
         
         .stat-card {
-            background: white;
-            border-left: 4px solid var(--accent-color);
+            border-left: 3px solid var(--admin-accent);
+            transition: box-shadow 0.2s;
+        }
+        
+        .stat-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
         
         .stat-card .card-body {
-            padding: 25px;
+            padding: 18px;
         }
         
         .stat-number {
-            font-size: 2.5rem;
+            font-size: 1.5rem;
             font-weight: 700;
-            margin-bottom: 5px;
-            color: var(--text-color);
+            margin-bottom: 2px;
+            color: var(--admin-text);
+            letter-spacing: -0.02em;
         }
         
         .stat-label {
-            font-size: 0.9rem;
-            color: #7f8c8d;
+            font-size: 0.8125rem;
+            color: var(--admin-text-muted);
             font-weight: 500;
+        }
+        
+        .stat-card .text-muted,
+        .stat-card small {
+            font-size: 0.75rem;
+            color: var(--admin-text-muted);
         }
         
         .table {
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
+            font-size: 0.875rem;
+            border: none;
         }
         
         .table thead th {
-            background: var(--light-gray);
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-color);
+            background: var(--admin-bg);
+            border-bottom: 1px solid var(--admin-border);
+            color: var(--admin-text-muted);
             font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 10px 14px;
+        }
+        
+        .table td {
+            padding: 12px 14px;
+            vertical-align: middle;
+        }
+        
+        .table-hover tbody tr:hover {
+            background: var(--admin-bg);
         }
         
         .btn-primary {
-            background: var(--accent-color);
-            border-color: var(--accent-color);
-            color: white;
+            background: var(--admin-accent);
+            border-color: var(--admin-accent);
+            color: #fff;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 8px;
         }
         
         .btn-primary:hover {
-            background: #2980b9;
-            border-color: #2980b9;
+            background: var(--admin-accent-dark);
+            border-color: var(--admin-accent-dark);
+            color: #fff;
         }
         
         .btn-outline-primary {
-            color: var(--accent-color);
-            border-color: var(--accent-color);
+            color: var(--admin-accent);
+            border-color: var(--admin-border);
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 8px;
         }
         
         .btn-outline-primary:hover {
-            background: var(--accent-color);
-            border-color: var(--accent-color);
+            background: rgba(107, 178, 82, 0.08);
+            border-color: var(--admin-accent);
+            color: var(--admin-accent-dark);
+        }
+        
+        .btn-sm {
+            font-size: 0.8125rem;
+            padding: 4px 10px;
         }
         
         .badge {
-            font-size: 0.75rem;
-            font-weight: 500;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 6px;
         }
         
         .chart-container {
             position: relative;
-            height: 300px;
+            height: 260px;
         }
         
-        .border-left-primary {
-            border-left: 4px solid var(--primary-color) !important;
-        }
+        .border-left-primary { border-left-color: #64748b !important; }
+        .border-left-success { border-left-color: #22c55e !important; }
+        .border-left-info { border-left-color: #0ea5e9 !important; }
+        .border-left-warning { border-left-color: #f59e0b !important; }
+        .border-left-danger { border-left-color: #ef4444 !important; }
         
-        .border-left-success {
-            border-left: 4px solid #28a745 !important;
-        }
+        .alert-success { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+        .alert-danger { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
         
-        .border-left-info {
-            border-left: 4px solid #17a2b8 !important;
-        }
-        
-        .border-left-warning {
-            border-left: 4px solid #ffc107 !important;
-        }
-        
-        .border-left-danger {
-            border-left: 4px solid #dc3545 !important;
-        }
-        
-        .alert-success {
-            background: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
-        }
-        
-        .alert-danger {
-            background: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
-        }
-        
-        /* Checkboxes - ensure visibility everywhere */
         .form-check-input,
         input[type="checkbox"] {
-            width: 1.2em !important;
-            height: 1.2em !important;
-            min-width: 1.2em !important;
-            min-height: 1.2em !important;
+            width: 1.15em !important;
+            height: 1.15em !important;
+            min-width: 1.15em !important;
+            min-height: 1.15em !important;
             margin-top: 0.15em !important;
-            border: 2px solid #adb5bd !important;
+            border: 2px solid #cbd5e1 !important;
             background-color: #fff !important;
             cursor: pointer !important;
-            flex-shrink: 0 !important;
         }
-        .form-check-input:checked,
-        input[type="checkbox"]:checked {
-            background-color: var(--accent-color) !important;
-            border-color: var(--accent-color) !important;
+        .form-check-input:checked, input[type="checkbox"]:checked {
+            background-color: var(--admin-accent) !important;
+            border-color: var(--admin-accent) !important;
         }
         .form-check-input:focus {
-            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25) !important;
+            box-shadow: 0 0 0 0.2rem rgba(107, 178, 82, 0.2) !important;
         }
         
-        .text-success {
-            color: #27ae60 !important;
-        }
+        .text-success { color: #22c55e !important; }
+        .text-warning { color: #f59e0b !important; }
+        .text-danger { color: #ef4444 !important; }
+        .text-info { color: #0ea5e9 !important; }
         
-        .text-warning {
-            color: #f39c12 !important;
-        }
-        
-        .text-danger {
-            color: #e74c3c !important;
-        }
-        
-        .text-info {
-            color: var(--accent-color) !important;
-        }
+        .bg-warning.text-dark { background: #fef3c7 !important; color: #92400e !important; }
         
         @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            
-            .sidebar.show {
-                transform: translateX(0);
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.show { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .content { padding: 16px; }
         }
     </style>
     
+    @if(request()->routeIs('admin.products.create') || request()->routeIs('admin.products.edit'))
+    <style>
+    .note-toolbar { display: flex !important; flex-wrap: wrap !important; }
+    .note-editor.note-frame { display: block !important; }
+    </style>
+    @endif
     @stack('styles')
 </head>
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
-        <div class="sidebar-header d-flex align-items-center gap-2">
-            <img src="{{ asset('assets/logo/logo.png') }}" alt="Greenleaf" style="max-height: 48px; width: auto;">
-            <h4 class="mb-0">Admin Dashboard</h4>
+        <div class="sidebar-header">
+            <img src="{{ asset('assets/logo/logo.png') }}" alt="Greenleaf">
+            <span class="sidebar-title">Admin</span>
         </div>
         <nav class="sidebar-nav">
             <ul class="nav flex-column">
@@ -366,7 +444,7 @@
                         Settings
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item nav-item-external">
                     <a class="nav-link" href="{{ route('agriculture.home') }}">
                         <i class="fas fa-external-link-alt"></i>
                         View Website
@@ -418,6 +496,47 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Summernote JS (after jQuery + Bootstrap) -->
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.js"
+            crossorigin="anonymous"></script>
+    @if(request()->routeIs('admin.products.create') || request()->routeIs('admin.products.edit'))
+    <script>
+    (function() {
+        function initSummernote() {
+            try {
+                if (typeof jQuery === 'undefined') return;
+                if (!jQuery.fn.summernote) {
+                    setTimeout(initSummernote, 250);
+                    return;
+                }
+                var el = document.getElementById('description');
+                if (!el) return;
+                if (el.nextElementSibling && el.nextElementSibling.classList && el.nextElementSibling.classList.contains('note-editor')) return;
+                jQuery('#description').summernote({
+                    height: 200,
+                    tooltip: false,
+                    toolbar: [
+                        ['style', ['bold', 'italic', 'underline']],
+                        ['para', ['ul', 'ol', 'paragraph']],
+                        ['insert', ['link']],
+                        ['view', ['codeview']]
+                    ]
+                });
+            } catch (e) {
+                console.error('Summernote init error:', e);
+            }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() { setTimeout(initSummernote, 150); });
+        } else {
+            setTimeout(initSummernote, 150);
+        }
+        window.addEventListener('load', function() {
+            if (document.getElementById('description') && !document.querySelector('#description + .note-editor')) initSummernote();
+        });
+    })();
+    </script>
+    @endif
     <script>
         (function() {
             const toggle = document.getElementById('sidebarToggle');

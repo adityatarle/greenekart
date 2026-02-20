@@ -16,6 +16,15 @@
                     </div>
                 </div>
                 <div class="card-body">
+                    <form method="GET" action="{{ route('admin.categories.index') }}" class="mb-3">
+                        <div class="input-group" style="max-width: 400px;">
+                            <input type="text" name="search" class="form-control" placeholder="Search by name or description..." value="{{ request('search') }}">
+                            <button type="submit" class="btn btn-outline-primary"><i class="fas fa-search"></i> Search</button>
+                            @if(request('search'))
+                                <a href="{{ route('admin.categories.index') }}" class="btn btn-outline-secondary">Clear</a>
+                            @endif
+                        </div>
+                    </form>
                     @if($categories->count() > 0)
                         <div class="table-responsive">
                             <table class="table table-striped">

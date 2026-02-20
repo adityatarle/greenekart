@@ -3,101 +3,149 @@
 @section('title', 'Create Product')
 @section('page-title', 'Create New Product')
 
-@push('styles')
-<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.css" rel="stylesheet">
-<style>
-/* Summernote + Bootstrap 5: show toolbar and fix dropdowns */
-.note-editor.note-frame { display: block !important; }
-.note-toolbar { display: flex !important; flex-wrap: wrap; }
-.note-btn.dropdown-toggle::after { content: none; }
-</style>
-@endpush
-
 @section('content')
 <div class="row">
     <div class="col-lg-8">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Product Information</h5>
-            </div>
-            <div class="card-body">
-                <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    
+        <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+
+            <!-- 1. Basic info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
+                </div>
+                <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="name" class="form-label">Product Name *</label>
-                                <input type="text" class="form-control @error('name') is-invalid @enderror" 
-                                       id="name" name="name" value="{{ old('name') }}" required>
-                                @error('name')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required>
+                                @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="sku" class="form-label">SKU *</label>
-                                <input type="text" class="form-control @error('sku') is-invalid @enderror" 
-                                       id="sku" name="sku" value="{{ old('sku') }}" required>
-                                @error('sku')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <input type="text" class="form-control @error('sku') is-invalid @enderror" id="sku" name="sku" value="{{ old('sku') }}" required>
+                                @error('sku')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                         </div>
                     </div>
-
-                    <!-- Product Images -->
-                    <div class="alert alert-primary mb-3">
-                        <strong><i class="fas fa-image me-2"></i>Product Images</strong>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="agriculture_category_id" class="form-label">Category *</label>
+                                <select class="form-select @error('agriculture_category_id') is-invalid @enderror" id="agriculture_category_id" name="agriculture_category_id" required>
+                                    <option value="">Select Category</option>
+                                    @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ old('agriculture_category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('agriculture_category_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="agriculture_subcategory_id" class="form-label">Subcategory</label>
+                                <select class="form-select @error('agriculture_subcategory_id') is-invalid @enderror" id="agriculture_subcategory_id" name="agriculture_subcategory_id">
+                                    <option value="">Select Subcategory</option>
+                                    @foreach($subcategories as $subcategory)
+                                    <option value="{{ $subcategory->id }}" data-category-id="{{ $subcategory->agriculture_category_id }}" {{ old('agriculture_subcategory_id') == $subcategory->id ? 'selected' : '' }}>{{ $subcategory->name }} ({{ $subcategory->category->name ?? '' }})</option>
+                                    @endforeach
+                                </select>
+                                @error('agriculture_subcategory_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+                        </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="brand_id" class="form-label">Brand</label>
+                                <select class="form-select @error('brand_id') is-invalid @enderror" id="brand_id" name="brand_id">
+                                    <option value="">Select Brand (Optional)</option>
+                                    <option value="custom" {{ old('brand_custom') ? 'selected' : '' }}>Enter Custom Brand</option>
+                                    @foreach($brands as $brand)
+                                    <option value="{{ $brand->id }}" {{ old('brand_id') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
+                                    @endforeach
+                                </select>
+                                <input type="text" class="form-control mt-2 @error('brand_custom') is-invalid @enderror" id="brand_custom" name="brand_custom" value="{{ old('brand_custom') }}" placeholder="Custom brand name" style="display: {{ old('brand_custom') ? 'block' : 'none' }};">
+                                @error('brand_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                @error('brand_custom')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="model" class="form-label">Model</label>
+                                <input type="text" class="form-control @error('model') is-invalid @enderror" id="model" name="model" value="{{ old('model') }}">
+                                @error('model')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <!-- 2. Descriptions (Short + Rich text) -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-align-left me-2"></i>Descriptions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="short_description" class="form-label">Short Description</label>
+                        <textarea class="form-control @error('short_description') is-invalid @enderror" id="short_description" name="short_description" rows="2" placeholder="Brief summary for listings">{{ old('short_description') }}</textarea>
+                        @error('short_description')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="mb-0">
+                        <label for="description" class="form-label">Full Description</label>
+                        <textarea id="description" name="description" class="form-control @error('description') is-invalid @enderror" rows="6" placeholder="Use the toolbar for bold, italic, lists and links.">{{ old('description') }}</textarea>
+                        @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Images & video -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-image me-2"></i>Images & Video</h5>
+                </div>
+                <div class="card-body">
                     <div class="mb-3">
                         <label for="primary_image" class="form-label">Primary Image *</label>
-                        <input type="file" class="form-control @error('primary_image') is-invalid @enderror" 
-                               id="primary_image" name="primary_image" accept="image/*">
-                        @error('primary_image')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                        <small class="text-muted d-block mt-1">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Accepted: All image types | Max size: 2MB | Min dimensions: 400x400px
-                        </small>
+                        <input type="file" class="form-control @error('primary_image') is-invalid @enderror" id="primary_image" name="primary_image" accept="image/*">
+                        @error('primary_image')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        <small class="text-muted">All image types, max 2MB, min 400×400px</small>
                         <div id="primary_image_preview" class="mt-2"></div>
                     </div>
-
                     <div class="mb-3">
                         <label for="gallery_images" class="form-label">Gallery Images (Optional)</label>
-                        <input type="file" class="form-control @error('gallery_images.*') is-invalid @enderror" 
-                               id="gallery_images" name="gallery_images[]" accept="image/*" multiple>
-                        @error('gallery_images.*')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                        <small class="text-muted d-block mt-1">
-                            <i class="fas fa-info-circle me-1"></i>
-                            You can select up to 5 images | Each max 2MB
-                        </small>
+                        <input type="file" class="form-control @error('gallery_images.*') is-invalid @enderror" id="gallery_images" name="gallery_images[]" accept="image/*" multiple>
+                        @error('gallery_images.*')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        <small class="text-muted">Up to 5 images, 2MB each</small>
                         <div id="gallery_images_preview" class="mt-2 d-flex gap-2 flex-wrap"></div>
                     </div>
-
-                    <!-- Retail Pricing -->
-                    <div class="alert alert-info mb-3">
-                        <strong><i class="fas fa-info-circle me-2"></i>Retail Pricing</strong> - Prices for normal customers
+                    <div class="mb-0">
+                        <label for="youtube_video_url" class="form-label">YouTube Video URL (Optional)</label>
+                        <input type="url" class="form-control @error('youtube_video_url') is-invalid @enderror" id="youtube_video_url" name="youtube_video_url" value="{{ old('youtube_video_url') }}" placeholder="https://www.youtube.com/watch?v=...">
+                        @error('youtube_video_url')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
-                    
+                </div>
+            </div>
+
+            <!-- 4. Pricing -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-rupee-sign me-2"></i>Pricing</h5>
+                </div>
+                <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="price" class="form-label">Retail Price *</label>
                                 <div class="input-group">
                                     <span class="input-group-text">₹</span>
-                                    <input type="number" step="0.01" class="form-control @error('price') is-invalid @enderror" 
-                                           id="price" name="price" value="{{ old('price') }}" required>
-                                    @error('price')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <input type="number" step="0.01" class="form-control @error('price') is-invalid @enderror" id="price" name="price" value="{{ old('price') }}" required>
+                                    @error('price')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 </div>
-                                <small class="text-muted">Regular price for customers</small>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -105,35 +153,21 @@
                                 <label for="sale_price" class="form-label">Retail Sale Price</label>
                                 <div class="input-group">
                                     <span class="input-group-text">₹</span>
-                                    <input type="number" step="0.01" class="form-control @error('sale_price') is-invalid @enderror" 
-                                           id="sale_price" name="sale_price" value="{{ old('sale_price') }}">
-                                    @error('sale_price')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <input type="number" step="0.01" class="form-control @error('sale_price') is-invalid @enderror" id="sale_price" name="sale_price" value="{{ old('sale_price') }}">
+                                    @error('sale_price')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 </div>
-                                <small class="text-muted">Optional discounted price</small>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Dealer/Wholesale Pricing -->
-                    <div class="alert alert-success mb-3">
-                        <strong><i class="fas fa-user-tie me-2"></i>Dealer/Wholesale Pricing</strong> - Prices for approved dealers
-                    </div>
-                    
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="dealer_price" class="form-label">Dealer Price *</label>
                                 <div class="input-group">
                                     <span class="input-group-text">₹</span>
-                                    <input type="number" step="0.01" class="form-control @error('dealer_price') is-invalid @enderror" 
-                                           id="dealer_price" name="dealer_price" value="{{ old('dealer_price') }}" required>
-                                    @error('dealer_price')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <input type="number" step="0.01" class="form-control @error('dealer_price') is-invalid @enderror" id="dealer_price" name="dealer_price" value="{{ old('dealer_price') }}" required>
+                                    @error('dealer_price')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 </div>
-                                <small class="text-muted">Wholesale price for dealers</small>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -141,257 +175,46 @@
                                 <label for="dealer_sale_price" class="form-label">Dealer Sale Price</label>
                                 <div class="input-group">
                                     <span class="input-group-text">₹</span>
-                                    <input type="number" step="0.01" class="form-control @error('dealer_sale_price') is-invalid @enderror" 
-                                           id="dealer_sale_price" name="dealer_sale_price" value="{{ old('dealer_sale_price') }}">
-                                    @error('dealer_sale_price')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <small class="text-muted">Optional dealer discount price</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <div class="alert alert-warning">
-                                    <i class="fas fa-calculator me-2"></i>
-                                    <strong>Price Calculation:</strong>
-                                    <span id="price-info">Enter prices to see discount percentage</span>
+                                    <input type="number" step="0.01" class="form-control @error('dealer_sale_price') is-invalid @enderror" id="dealer_sale_price" name="dealer_sale_price" value="{{ old('dealer_sale_price') }}">
+                                    @error('dealer_sale_price')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <div class="alert alert-light border small mb-0">
+                        <i class="fas fa-calculator me-2"></i><strong>Calculation:</strong> <span id="price-info">Enter prices to see discount %</span>
+                    </div>
+                </div>
+            </div>
 
+            <!-- 5. Inventory & options -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-cubes me-2"></i>Inventory & Options</h5>
+                </div>
+                <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="stock_quantity" class="form-label">Stock Quantity *</label>
-                                <input type="number" class="form-control @error('stock_quantity') is-invalid @enderror" 
-                                       id="stock_quantity" name="stock_quantity" value="{{ old('stock_quantity', 0) }}" required>
-                                @error('stock_quantity')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <input type="number" class="form-control @error('stock_quantity') is-invalid @enderror" id="stock_quantity" name="stock_quantity" value="{{ old('stock_quantity', 0) }}" required>
+                                @error('stock_quantity')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="agriculture_category_id" class="form-label">Category *</label>
-                                <select class="form-select @error('agriculture_category_id') is-invalid @enderror" 
-                                        id="agriculture_category_id" name="agriculture_category_id" required>
-                                    <option value="">Select Category</option>
-                                    @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" {{ old('agriculture_category_id') == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
-                                    </option>
-                                    @endforeach
-                                </select>
-                                @error('agriculture_category_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="agriculture_subcategory_id" class="form-label">Subcategory (Optional)</label>
-                                <select class="form-select @error('agriculture_subcategory_id') is-invalid @enderror" 
-                                        id="agriculture_subcategory_id" name="agriculture_subcategory_id">
-                                    <option value="">Select Subcategory</option>
-                                    @foreach($subcategories as $subcategory)
-                                    <option value="{{ $subcategory->id }}" 
-                                            data-category-id="{{ $subcategory->agriculture_category_id }}"
-                                            {{ old('agriculture_subcategory_id') == $subcategory->id ? 'selected' : '' }}>
-                                        {{ $subcategory->name }} ({{ $subcategory->category->name ?? '' }})
-                                    </option>
-                                    @endforeach
-                                </select>
-                                @error('agriculture_subcategory_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                <small class="text-muted">Select a category first to filter subcategories</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="brand_id" class="form-label">Brand</label>
-                                <select class="form-select @error('brand_id') is-invalid @enderror" 
-                                        id="brand_id" name="brand_id">
-                                    <option value="">Select Brand (Optional)</option>
-                                    <option value="custom" {{ old('brand_custom') ? 'selected' : '' }}>Enter Custom Brand</option>
-                                    @foreach($brands as $brand)
-                                    <option value="{{ $brand->id }}" {{ old('brand_id') == $brand->id ? 'selected' : '' }}>
-                                        {{ $brand->name }}
-                                    </option>
-                                    @endforeach
-                                </select>
-                                <input type="text" 
-                                       class="form-control mt-2 @error('brand_custom') is-invalid @enderror" 
-                                       id="brand_custom" 
-                                       name="brand_custom" 
-                                       value="{{ old('brand_custom') }}"
-                                       placeholder="Enter custom brand name"
-                                       style="display: {{ old('brand_custom') ? 'block' : 'none' }};">
-                                @error('brand_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                @error('brand_custom')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                <small class="text-muted">Select from existing brands or enter a custom brand name</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="model" class="form-label">Model</label>
-                                <input type="text" class="form-control @error('model') is-invalid @enderror" 
-                                       id="model" name="model" value="{{ old('model') }}">
-                                @error('model')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="short_description" class="form-label">Short Description</label>
-                        <textarea class="form-control @error('short_description') is-invalid @enderror" 
-                                  id="short_description" name="short_description" rows="2">{{ old('short_description') }}</textarea>
-                        @error('short_description')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control @error('description') is-invalid @enderror" 
-                                  id="description" name="description" rows="8">{{ old('description') }}</textarea>
-                        @error('description')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                        <small class="text-muted d-block mt-1">Use the toolbar above for formatting, lists, and links.</small>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="youtube_video_url" class="form-label">YouTube Video Link (Optional)</label>
-                        <input type="url" class="form-control @error('youtube_video_url') is-invalid @enderror" 
-                               id="youtube_video_url" name="youtube_video_url" value="{{ old('youtube_video_url') }}" 
-                               placeholder="e.g. https://www.youtube.com/watch?v=VIDEO_ID">
-                        @error('youtube_video_url')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                        <small class="text-muted d-block mt-1">Paste a YouTube video URL to show it on the product page.</small>
-                    </div>
-
-                    <!-- Product Specifications Table -->
-                    <div class="alert alert-secondary mb-3">
-                        <strong><i class="fas fa-table me-2"></i>Product Specifications</strong> - Add key-value pairs for product specifications
-                    </div>
-                    
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label class="form-label mb-0">Specifications Table</label>
-                            <button type="button" class="btn btn-sm btn-primary" id="addSpecRow">
-                                <i class="fas fa-plus me-1"></i>Add Row
-                            </button>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-bordered" id="specificationsTable">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 40%;">Specification Name</th>
-                                        <th style="width: 55%;">Value</th>
-                                        <th style="width: 5%;">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="specificationsTableBody">
-                                    @if(old('specifications'))
-                                        @foreach(old('specifications') as $index => $spec)
-                                        <tr>
-                                            <td>
-                                                <input type="text" 
-                                                       class="form-control form-control-sm spec-key" 
-                                                       name="specifications[{{ $index }}][key]" 
-                                                       value="{{ $spec['key'] ?? '' }}" 
-                                                       placeholder="e.g., Weight, Power, Voltage">
-                                            </td>
-                                            <td>
-                                                <input type="text" 
-                                                       class="form-control form-control-sm spec-value" 
-                                                       name="specifications[{{ $index }}][value]" 
-                                                       value="{{ $spec['value'] ?? '' }}" 
-                                                       placeholder="e.g., 4.7 kg, 1000W, 230V">
-                                            </td>
-                                            <td>
-                                                <button type="button" class="btn btn-sm btn-danger removeSpecRow">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        @endforeach
-                                    @else
-                                        <tr>
-                                            <td>
-                                                <input type="text" 
-                                                       class="form-control form-control-sm spec-key" 
-                                                       name="specifications[0][key]" 
-                                                       placeholder="e.g., Weight, Power, Voltage">
-                                            </td>
-                                            <td>
-                                                <input type="text" 
-                                                       class="form-control form-control-sm spec-value" 
-                                                       name="specifications[0][value]" 
-                                                       placeholder="e.g., 4.7 kg, 1000W, 230V">
-                                            </td>
-                                            <td>
-                                                <button type="button" class="btn btn-sm btn-danger removeSpecRow">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @endif
-                                </tbody>
-                            </table>
-                        </div>
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Add product specifications like weight, power, dimensions, etc. Leave empty rows will be ignored.
-                        </small>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
+                            <div class="mb-3 d-flex flex-wrap gap-3 align-items-end" style="padding-top: 1.85rem;">
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="is_active" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="is_active">Active</label>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="is_featured" name="is_featured" value="1" {{ old('is_featured') ? 'checked' : '' }}>
                                     <label class="form-check-label" for="is_featured">Featured</label>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="in_stock" name="in_stock" value="1" {{ old('in_stock', true) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="in_stock">In Stock</label>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="manage_stock" name="manage_stock" value="1" {{ old('manage_stock', true) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="manage_stock">Manage Stock</label>
@@ -399,18 +222,61 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>Create Product
-                        </button>
-                        <a href="{{ route('admin.products.index') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left me-2"></i>Cancel
-                        </a>
-                    </div>
-                </form>
+                </div>
             </div>
-        </div>
+
+            <!-- 6. Specifications -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-table me-2"></i>Specifications</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label mb-0">Key-value pairs (e.g. Weight, Power)</label>
+                        <button type="button" class="btn btn-sm btn-primary" id="addSpecRow">
+                            <i class="fas fa-plus me-1"></i>Add Row
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="specificationsTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40%;">Name</th>
+                                    <th style="width: 55%;">Value</th>
+                                    <th style="width: 5%;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="specificationsTableBody">
+                                @if(old('specifications'))
+                                    @foreach(old('specifications') as $index => $spec)
+                                    <tr>
+                                        <td><input type="text" class="form-control form-control-sm spec-key" name="specifications[{{ $index }}][key]" value="{{ $spec['key'] ?? '' }}" placeholder="e.g. Weight"></td>
+                                        <td><input type="text" class="form-control form-control-sm spec-value" name="specifications[{{ $index }}][value]" value="{{ $spec['value'] ?? '' }}" placeholder="e.g. 4.7 kg"></td>
+                                        <td><button type="button" class="btn btn-sm btn-danger removeSpecRow"><i class="fas fa-trash"></i></button></td>
+                                    </tr>
+                                    @endforeach
+                                @else
+                                    <tr>
+                                        <td><input type="text" class="form-control form-control-sm spec-key" name="specifications[0][key]" placeholder="e.g. Weight"></td>
+                                        <td><input type="text" class="form-control form-control-sm spec-value" name="specifications[0][value]" placeholder="e.g. 4.7 kg"></td>
+                                        <td><button type="button" class="btn btn-sm btn-danger removeSpecRow"><i class="fas fa-trash"></i></button></td>
+                                    </tr>
+                                @endif
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mb-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Create Product
+                </button>
+                <a href="{{ route('admin.products.index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Cancel
+                </a>
+            </div>
+        </form>
     </div>
     
     <div class="col-lg-4">
@@ -470,37 +336,6 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.js"></script>
-<script>
-(function() {
-    function initSummernote() {
-        if (typeof jQuery === 'undefined' || !jQuery.fn.summernote) return;
-        var $desc = jQuery('#description');
-        if (!$desc.length) return;
-        $desc.summernote({
-            height: 280,
-            toolbar: [
-                ['style', ['style']],
-                ['font', ['bold', 'italic', 'underline', 'clear']],
-                ['fontname', ['fontname']],
-                ['color', ['color']],
-                ['para', ['ul', 'ol', 'paragraph']],
-                ['table', ['table']],
-                ['insert', ['link']],
-                ['view', ['fullscreen', 'codeview', 'help']]
-            ],
-            placeholder: 'Enter product description with formatting, lists, and links...'
-        });
-        // Bootstrap 5 dropdown fix: Summernote uses data-toggle, BS5 uses data-bs-toggle
-        jQuery('.note-toolbar [data-toggle="dropdown"]').attr('data-bs-toggle', 'dropdown').removeAttr('data-toggle');
-    }
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() { setTimeout(initSummernote, 50); });
-    } else {
-        setTimeout(initSummernote, 50);
-    }
-})();
-</script>
 <script>
 // Image Preview for Primary Image
 document.getElementById('primary_image').addEventListener('change', function(e) {

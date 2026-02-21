@@ -114,10 +114,6 @@
                         <span>Shipping</span>
                         <span class="text-muted">Calculated at checkout</span>
                     </div>
-                    <div class="summary-row">
-                        <span>Tax</span>
-                        <span class="text-muted">Calculated at checkout</span>
-                    </div>
                     
                     <div class="summary-total">
                         <span>Total</span>

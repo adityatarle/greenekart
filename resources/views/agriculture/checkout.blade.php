@@ -117,7 +117,6 @@
                     @php
                         $cart = session('cart', []);
                         $subtotal = 0;
-                        $taxRate = 0.08; // 8% tax
                         $user = Auth::user(); // Get authenticated user for dealer pricing
                     @endphp
 
@@ -142,19 +141,13 @@
 
                     @php
                         $subtotal = round($subtotal, 2);
-                        $taxAmount = round($subtotal * $taxRate, 2);
                         $shippingCost = 25;
-                        $totalAmount = round($subtotal + $taxAmount + $shippingCost, 2);
+                        $totalAmount = round($subtotal + $shippingCost, 2);
                     @endphp
                     
                     <div class="d-flex justify-content-between mb-2">
                         <span>Subtotal:</span>
                         <span>{{ $currencySymbol ?? '₹' }}{{ number_format($subtotal, 2) }}</span>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Tax (8%):</span>
-                        <span>{{ $currencySymbol ?? '₹' }}{{ number_format($taxAmount, 2) }}</span>
                     </div>
                     
                     <div class="d-flex justify-content-between mb-2">

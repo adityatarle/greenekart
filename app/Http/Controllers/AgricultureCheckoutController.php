@@ -43,9 +43,8 @@ class AgricultureCheckoutController extends Controller
                 ->with('error', 'Your cart is empty. Please add items before checkout.');
         }
 
-        // Calculate totals
+        // Calculate totals (no tax)
         $subtotal = 0;
-        $taxRate = 0.08; // 8% tax
         $shippingCost = 25;
         $user = Auth::user(); // Get authenticated user for dealer pricing
 
@@ -58,8 +57,7 @@ class AgricultureCheckoutController extends Controller
             }
         }
 
-        $taxAmount = round($subtotal * $taxRate, 2);
-        $totalAmount = round($subtotal + $taxAmount + $shippingCost, 2);
+        $totalAmount = round($subtotal + $shippingCost, 2);
 
         // Generate unique order number starting from GL-1001
         $orderNumber = AgricultureOrder::generateOrderNumber();
@@ -74,7 +72,7 @@ class AgricultureCheckoutController extends Controller
             'billing_address' => ['address' => $request->billing_address], // Store as array for JSON column
             'shipping_address' => $request->shipping_address ? ['address' => $request->shipping_address] : ['address' => $request->billing_address],
             'subtotal' => $subtotal,
-            'tax_amount' => $taxAmount,
+            'tax_amount' => 0,
             'shipping_amount' => $shippingCost,
             'total_amount' => $totalAmount,
             'payment_method' => 'inquiry', // Mark as inquiry (no payment)
@@ -132,15 +130,14 @@ class AgricultureCheckoutController extends Controller
             }
         }
         
-        // Recalculate tax and total based on actual order items subtotal
+        // Recalculate total based on actual order items subtotal (no tax)
         $calculatedSubtotal = round($calculatedSubtotal, 2);
-        $calculatedTaxAmount = round($calculatedSubtotal * $taxRate, 2);
-        $calculatedTotalAmount = round($calculatedSubtotal + $calculatedTaxAmount + $shippingCost, 2);
+        $calculatedTotalAmount = round($calculatedSubtotal + $shippingCost, 2);
         
         // Update order with recalculated values to ensure accuracy
         $order->update([
             'subtotal' => $calculatedSubtotal,
-            'tax_amount' => $calculatedTaxAmount,
+            'tax_amount' => 0,
             'total_amount' => $calculatedTotalAmount
         ]);
 

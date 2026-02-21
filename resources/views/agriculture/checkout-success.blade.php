@@ -167,10 +167,12 @@
                                 <span>Subtotal:</span>
                                 <span>{{ $currencySymbol ?? '₹' }}{{ number_format($order->subtotal, 2) }}</span>
                             </div>
+                            @if($order->tax_amount > 0)
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Tax:</span>
                                 <span>{{ $currencySymbol ?? '₹' }}{{ number_format($order->tax_amount, 2) }}</span>
                             </div>
+                            @endif
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Shipping:</span>
                                 <span>{{ $currencySymbol ?? '₹' }}{{ number_format($order->shipping_amount, 2) }}</span>

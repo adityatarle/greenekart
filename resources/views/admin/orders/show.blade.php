@@ -223,10 +223,12 @@
                                     <td>Subtotal:</td>
                                     <td class="text-right">{{ $currencySymbol ?? '₹' }}{{ number_format($order->subtotal, 2) }}</td>
                                 </tr>
+                                @if($order->tax_amount > 0)
                                 <tr>
                                     <td>Tax:</td>
                                     <td class="text-right">{{ $currencySymbol ?? '₹' }}{{ number_format($order->tax_amount, 2) }}</td>
                                 </tr>
+                                @endif
                                 <tr>
                                     <td>Shipping:</td>
                                     <td class="text-right">{{ $currencySymbol ?? '₹' }}{{ number_format($order->shipping_amount, 2) }}</td>

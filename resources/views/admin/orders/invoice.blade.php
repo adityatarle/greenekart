@@ -246,10 +246,12 @@
                 <div class="totals-label">Subtotal</div>
                 <div class="totals-value">&#8377;{{ number_format($order->subtotal, 2) }}</div>
             </div>
+            @if($order->tax_amount > 0)
             <div class="totals-row">
                 <div class="totals-label">Tax</div>
                 <div class="totals-value">&#8377;{{ number_format($order->tax_amount, 2) }}</div>
             </div>
+            @endif
             <div class="totals-row">
                 <div class="totals-label">Shipping</div>
                 <div class="totals-value">&#8377;{{ number_format($order->shipping_amount, 2) }}</div>

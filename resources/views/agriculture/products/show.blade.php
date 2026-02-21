@@ -232,9 +232,9 @@
         <div class="section-header mb-3">
             <h4 class="section-heading">Related Products</h4>
         </div>
-        <div class="related-products-grid row g-3">
+        <div class="related-products-grid row g-2">
             @foreach($relatedProducts as $relatedProduct)
-            <div class="col-6 col-md-4 col-lg-3">
+            <div class="col-4 col-sm-4 col-md-3 col-lg-2">
                 <x-product-card :product="$relatedProduct" />
             </div>
             @endforeach
@@ -712,7 +712,7 @@
     color: #6c757d;
 }
 
-/* Related Products - uses same product card as shop page for aligned design */
+/* Related Products - compact cards, more per row */
 .related-products-section {
     margin-top: 2rem;
     padding-top: 2rem;
@@ -720,18 +720,92 @@
 }
 
 .related-products-section .section-header {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .related-products-section .section-heading {
     color: #2c3e50;
     font-weight: 600;
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     margin: 0;
 }
 
 .related-products-grid .pcard {
     height: 100%;
+}
+
+/* Compact card styling for related products only */
+.related-products-grid .pcard-inner {
+    padding: 0;
+}
+.related-products-grid .pcard-image-wrap {
+    aspect-ratio: 1;
+    padding: 8px;
+    min-height: 0;
+}
+.related-products-grid .pcard-image {
+    max-height: 100%;
+    object-fit: contain;
+}
+.related-products-grid .pcard-content {
+    padding: 8px 10px;
+}
+.related-products-grid .pcard-category {
+    font-size: 0.6rem;
+    margin-bottom: 4px;
+}
+.related-products-grid .pcard-title {
+    font-size: 0.75rem;
+    -webkit-line-clamp: 2;
+    min-height: 2.2em;
+    margin-bottom: 4px;
+}
+.related-products-grid .pcard-rating {
+    margin-bottom: 4px;
+}
+.related-products-grid .pcard-rating .stars svg {
+    width: 8px;
+    height: 8px;
+}
+.related-products-grid .rating-count {
+    font-size: 0.65rem;
+}
+.related-products-grid .pcard-price {
+    margin-bottom: 6px;
+}
+.related-products-grid .price-now {
+    font-size: 0.9rem;
+}
+.related-products-grid .price-old {
+    font-size: 0.7rem;
+}
+.related-products-grid .price-save {
+    font-size: 0.6rem;
+}
+.related-products-grid .pcard-brand {
+    font-size: 0.65rem;
+    margin-bottom: 6px;
+}
+.related-products-grid .pcard-cart-btn {
+    padding: 6px 10px;
+    font-size: 0.7rem;
+}
+.related-products-grid .pcard-cart-btn svg {
+    width: 12px;
+    height: 12px;
+}
+.related-products-grid .pcard-badge {
+    padding: 2px 5px;
+    font-size: 0.55rem;
+}
+.related-products-grid .pcard-quick-actions {
+    display: none;
+}
+@media (max-width: 576px) {
+    .related-products-grid .col-4 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
 }
 
 /* Responsive */

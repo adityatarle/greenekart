@@ -78,6 +78,11 @@
                         @endif
                         <form action="{{ route('contact.submit') }}" method="POST">
                             @csrf
+                            {{-- Honeypot: leave empty; bots that fill it are rejected --}}
+                            <div class="d-none" aria-hidden="true">
+                                <label for="website">Leave blank</label>
+                                <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                            </div>
                             <div class="form-row">
                                 <div class="form-group half">
                                     <label for="name">Full Name *</label>

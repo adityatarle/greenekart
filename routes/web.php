@@ -155,19 +155,11 @@ Route::get('/refund-policy', function () {
     return view('pages.refund');
 })->name('refund');
 
-// Contact form submission
-Route::post('/contact', function (\Illuminate\Http\Request $request) {
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|max:255',
-        'subject' => 'required|string|max:255',
-        'message' => 'required|string|max:1000',
-    ]);
-    
-    // Here you would typically send an email or store in database
-    // For now, just redirect back with success message
-    return redirect()->back()->with('success', 'Thank you for your message! We will get back to you soon.');
-})->name('contact.submit');
+// Contact form submission (throttle: 3 submissions per 15 minutes per IP)
+use App\Http\Controllers\ContactController;
+Route::post('/contact', [ContactController::class, 'submit'])
+    ->middleware('throttle:3,15')
+    ->name('contact.submit');
 
 // Route name aliases for framework defaults
 Route::get('/login', function () {

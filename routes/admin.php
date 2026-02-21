@@ -46,6 +46,7 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\OfferController;
 use App\Http\Controllers\Admin\BrandController;
+use App\Http\Controllers\Admin\ContactMessageController;
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', \App\Http\Middleware\EnsureUserIsAdmin::class])->group(function () {
     
@@ -110,6 +111,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', \App\Http\Middleware
     Route::post('/settings/single', [SettingsController::class, 'updateSingle'])->name('settings.update-single');
     Route::post('/settings/upload-apk', [SettingsController::class, 'uploadApk'])->name('settings.upload-apk');
     
+    // Contact form submissions
+    Route::prefix('contact-messages')->name('contact-messages.')->group(function () {
+        Route::get('/', [ContactMessageController::class, 'index'])->name('index');
+        Route::get('/{contactMessage}', [ContactMessageController::class, 'show'])->name('show');
+        Route::post('/{contactMessage}/mark-read', [ContactMessageController::class, 'markAsRead'])->name('mark-read');
+    });
+
     // Offers Management
     Route::prefix('offers')->name('offers.')->group(function () {
         Route::patch('/{offer}/toggle-status', [OfferController::class, 'toggleStatus'])->name('toggle-status');

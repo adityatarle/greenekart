@@ -8,6 +8,7 @@ use App\Models\AgricultureCategory;
 use App\Models\AgricultureOrder;
 use App\Models\User;
 use App\Models\DealerRegistration;
+use App\Models\ContactMessage;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -38,6 +39,8 @@ class DashboardController extends Controller
             'approved_dealers' => User::where('role', 'dealer')->where('is_dealer_approved', true)->count(),
             'pending_dealer_registrations' => DealerRegistration::where('status', 'pending')->count(),
             'rejected_dealer_registrations' => DealerRegistration::where('status', 'rejected')->count(),
+            'contact_messages' => ContactMessage::count(),
+            'contact_messages_unread' => ContactMessage::unread()->count(),
         ];
 
         // Recent orders
@@ -77,6 +80,9 @@ class DashboardController extends Controller
             ->latest()
             ->take(5)
             ->get();
+
+        // Recent contact form submissions
+        $recentContactMessages = ContactMessage::latest()->take(5)->get();
 
         // Top selling products (duplicate removed - using $topProducts above)
         $topSellingProducts = $topProducts;
@@ -138,6 +144,7 @@ class DashboardController extends Controller
             'recentDealerRegistrations',
             'lowStockProducts',
             'recentCustomers',
+            'recentContactMessages',
             'topSellingProducts',
             'ordersByStatus',
             'revenueByMonth'

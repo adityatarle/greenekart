@@ -171,6 +171,22 @@
             </div>
         </a>
     </div>
+    <div class="col-xl-3 col-md-6">
+        <a href="{{ route('admin.contact-messages.index') }}" class="admin-stat-link">
+            <div class="card stat-card border-left-info h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-number">{{ $stats['contact_messages'] ?? 0 }}</div>
+                            <div class="stat-label">Contact Messages</div>
+                            <small class="text-muted">{{ $stats['contact_messages_unread'] ?? 0 }} unread</small>
+                        </div>
+                        <i class="fas fa-envelope admin-stat-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
 </div>
 
 <!-- Charts Row -->
@@ -299,6 +315,49 @@
         </div>
     </div>
 </div>
+
+@if(isset($recentContactMessages) && $recentContactMessages->count() > 0)
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Recent Contact Messages</h5>
+                <a href="{{ route('admin.contact-messages.index') }}" class="btn btn-sm btn-primary">View All</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>From</th>
+                                <th>Subject</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($recentContactMessages as $msg)
+                            <tr class="{{ $msg->read_at ? '' : 'table-active' }}">
+                                <td><strong>{{ $msg->name }}</strong><br><small class="text-muted">{{ $msg->email }}</small></td>
+                                <td>{{ Str::limit($msg->subject, 35) }}</td>
+                                <td>{{ $msg->created_at->format('M d, Y') }}</td>
+                                <td>
+                                    @if($msg->read_at)<span class="badge bg-success">Read</span>@else<span class="badge bg-warning">Unread</span>@endif
+                                </td>
+                                <td>
+                                    <a href="{{ route('admin.contact-messages.show', $msg) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i> View</a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 
 @if($recentDealerRegistrations->count() > 0)
 <div class="row g-3 mb-4">

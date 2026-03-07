@@ -17,7 +17,7 @@
               <rect x="14" y="14" width="7" height="7"></rect>
               <rect x="3" y="14" width="7" height="7"></rect>
             </svg>
-            <span class="sidebar-title">Categories</span>
+            <span class="sidebar-title">Categorie</span>
           </div>
           <div class="sidebar-content">
             @if(isset($allCategories) && $allCategories->count() > 0)

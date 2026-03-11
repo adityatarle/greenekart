@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="products-page">
-    <div class="container-fluid px-lg-5">
+    <div class="container-lg section-shell">
         <div class="row">
             <!-- Products - Full Width -->
             <div class="col-12">

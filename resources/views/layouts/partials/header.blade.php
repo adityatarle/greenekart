@@ -314,7 +314,7 @@
           <!-- Logo Section -->
           <div class="header-logo">
             <a href="{{ route('agriculture.home') }}" class="logo-link d-flex align-items-center">
-              <img src="{{ asset('assets/logo/logo.png') }}" alt="Greenleaf" class="logo-img" style="max-height: 56px; width: auto;">
+              <img src="{{ asset('assets/logo/logo.png') }}" alt="Greenleaf" class="logo-img" style="max-height: 68px; width: auto;">
             </a>
             <button class="mobile-menu-toggle d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use xlink:href="#menu"></use></svg>
@@ -447,11 +447,12 @@
     </header>
     
     <style>
-    /* Categories Sub Navigation – compact */
+    /* Categories Sub Navigation – Premium minimal */
     .categories-subnav {
-        background: #fafbfa;
-        border-bottom: 1px solid #e8ece8;
+        background: var(--bg-pure);
+        border-bottom: 1px solid var(--border-color);
         padding: 0;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.02);
     }
     .categories-nav-wrapper {
         display: flex;
@@ -461,36 +462,38 @@
     }
     .category-nav-btn {
         flex-shrink: 0;
-        width: 28px;
-        height: 28px;
+        width: 32px;
+        height: 32px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #fff;
-        border: 1px solid #e2e8e2;
+        background: var(--bg-pure);
+        border: 1px solid var(--border-color);
         border-radius: 50%;
-        color: #5a6a5a;
+        color: var(--text-muted);
         cursor: pointer;
-        transition: background 0.2s, color 0.2s, border-color 0.2s;
+        transition: all 0.3s ease;
         z-index: 2;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
-    .category-nav-btn:hover {
-        background: #6BB252;
+    .category-nav-btn:hover:not(:disabled) {
+        background: var(--primary-color);
         color: #fff;
-        border-color: #6BB252;
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
     }
     .category-nav-btn:disabled {
-        opacity: 0.4;
+        opacity: 0.3;
         cursor: not-allowed;
-        pointer-events: none;
+        box-shadow: none;
     }
     .categories-scroll {
         flex: 1;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 12px;
         overflow-x: auto;
-        padding: 6px 10px;
+        padding: 12px 10px;
         scrollbar-width: none;
         -ms-overflow-style: none;
         scroll-behavior: smooth;
@@ -499,37 +502,43 @@
     .category-link {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
-        padding: 5px 12px;
-        background: #fff;
-        border: 1px solid #e2e8e2;
-        border-radius: 999px;
-        color: #5a6a5a;
-        font-size: 0.8rem;
+        gap: 6px;
+        padding: 8px 16px;
+        background: var(--bg-light);
+        border: 1px solid var(--border-color);
+        border-radius: 10px; /* less rounded tabs */
+        color: var(--text-dark);
+        font-family: 'Inter', sans-serif;
+        font-size: 0.85rem;
         font-weight: 500;
         text-decoration: none;
         white-space: nowrap;
-        transition: background 0.2s, border-color 0.2s, color 0.2s;
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
     }
     .category-link:hover {
-        background: #eef5ec;
-        border-color: #6BB252;
-        color: #2d5a27;
+        background: var(--bg-pure);
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        box-shadow: 0 4px 12px rgba(45, 106, 79, 0.1);
+        transform: translateY(-1px);
     }
     .category-link.active {
-        background: #6BB252;
-        border-color: #6BB252;
+        background: var(--primary-color);
+        border-color: var(--primary-color);
         color: #fff;
+        box-shadow: 0 4px 12px rgba(45, 106, 79, 0.2);
     }
     .category-link.view-all {
         background: transparent;
         border-color: transparent;
-        color: #6BB252;
+        color: var(--primary-color);
         font-weight: 600;
+        box-shadow: none;
     }
     .category-link.view-all:hover {
-        background: #eef5ec;
+        background: var(--bg-light);
         border-color: transparent;
+        transform: translateX(4px);
     }
     </style>
     <script>

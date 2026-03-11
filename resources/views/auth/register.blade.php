@@ -3,8 +3,9 @@
 @section('title', 'Register - Greenleaf')
 
 @section('content')
-<div class="container py-5">
-    <div class="row justify-content-center">
+<div class="checkout-page">
+    <div class="container-lg section-shell py-5">
+        <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
             <div class="card shadow border-0">
                 <div class="card-body p-5">
@@ -165,6 +166,7 @@
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 </div>

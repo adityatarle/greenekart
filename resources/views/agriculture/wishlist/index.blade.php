@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="wishlist-page py-4">
-    <div class="container-lg">
+    <div class="container-lg section-shell">
         <!-- Page Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>

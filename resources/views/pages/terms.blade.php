@@ -5,7 +5,7 @@
 @section('content')
 <!-- Hero Section -->
 <section class="hero-section py-5 bg-light">
-    <div class="container">
+    <div class="container-lg section-shell">
         <div class="row align-items-center">
             <div class="col-lg-6">
                 <h1 class="display-4 fw-bold text-dark mb-4">Terms of Service</h1>
@@ -23,7 +23,7 @@
 
 <!-- Terms Content -->
 <section class="py-5">
-    <div class="container">
+    <div class="container-lg section-shell">
         <div class="row">
             <div class="col-lg-8 mx-auto">
                 <div class="card border-0 shadow-sm">

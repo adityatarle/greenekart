@@ -6,18 +6,20 @@
 @section('content')
 <!-- Hero Section -->
 <section class="hero-section">
-    <div class="container-lg">
+    <div class="container-lg section-shell">
         <div class="row align-items-center">
-            <div class="col-lg-6">
+            <div class="col-lg-6 mb-4 mb-lg-0">
                 <h1 class="hero-title">Premium Agriculture Equipment</h1>
-                <p class="hero-subtitle">Discover the latest farming machinery, equipment, and supplies to boost your agricultural productivity</p>
+                <p class="hero-subtitle">Discover modern machinery and tools to boost your farm productivity with less effort.</p>
                 <div class="hero-buttons">
                     <a href="{{ route('agriculture.products.index') }}" class="btn btn-primary btn-lg">Shop Equipment</a>
                     <a href="#" class="btn btn-outline-primary btn-lg" onclick="showAlert('About page coming soon!', 'info', 'Coming Soon')">Learn More</a>
                 </div>
             </div>
             <div class="col-lg-6">
-                <img src="{{ asset('assets/organic/images/banner-1.jpg') }}" alt="Agriculture Equipment" class="img-fluid rounded">
+                <div class="hero-media-card shadow-md">
+                    <img src="{{ asset('assets/organic/images/banner-1.jpg') }}" alt="Agriculture Equipment" class="img-fluid rounded-4 w-100">
+                </div>
             </div>
         </div>
     </div>
@@ -25,8 +27,8 @@
 
 <!-- Features Section -->
 <section class="features-section">
-    <div class="container-lg">
-        <div class="row text-center">
+    <div class="container-lg section-shell">
+        <div class="row text-center g-3">
             <div class="col-md-4">
                 <div class="feature-item">
                     <div class="feature-icon">
@@ -66,7 +68,7 @@
 
 <!-- Categories Section -->
 <section class="categories-section py-5">
-    <div class="container-lg">
+    <div class="container-lg section-shell">
         <div class="row">
             <div class="col-12 text-center mb-5">
                 <h2 class="section-title">Agriculture Categories</h2>
@@ -99,7 +101,7 @@
 
 <!-- Featured Products Section -->
 <section class="py-5">
-    <div class="container-lg">
+    <div class="container-lg section-shell">
         <div class="row">
             <div class="col-12 text-center mb-5">
                 <h2 class="section-title">Featured Equipment</h2>
@@ -153,12 +155,12 @@
 
 <!-- Newsletter Section -->
 <section class="newsletter-section py-5">
-    <div class="container-lg">
+    <div class="container-lg section-shell">
         <div class="row justify-content-center text-center">
             <div class="col-lg-6">
                 <h2 class="newsletter-title">Stay Updated</h2>
                 <p class="newsletter-subtitle">Get the latest updates on agriculture equipment and farming technology</p>
-                <form action="{{ route('newsletter.subscribe') }}" method="POST" class="d-flex gap-2 mt-4">
+                <form action="{{ route('newsletter.subscribe') }}" method="POST" class="d-flex gap-2 mt-4 justify-content-center">
                     @csrf
                     <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
                     <button type="submit" class="btn btn-light">Subscribe</button>

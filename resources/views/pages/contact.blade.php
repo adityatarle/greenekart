@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="contact-page">
-    <div class="container-fluid px-lg-4">
+    <div class="container-fluid px-lg-4 section-shell">
         <!-- Page title -->
         <div class="contact-header mb-4">
             <h1 class="contact-title">Contact Us</h1>

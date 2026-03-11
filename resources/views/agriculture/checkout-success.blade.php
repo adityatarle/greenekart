@@ -4,7 +4,8 @@
 @section('description', 'Your agriculture equipment order has been confirmed')
 
 @section('content')
-<div class="container py-5">
+<div class="checkout-page">
+    <div class="container-lg section-shell py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <!-- Success Message -->

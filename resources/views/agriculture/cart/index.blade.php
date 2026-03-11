@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="cart-page py-4">
-    <div class="container-lg">
+    <div class="container-lg section-shell">
         <h1 class="page-title mb-4">Shopping Cart</h1>
         
         @if(count($cartItems) > 0)

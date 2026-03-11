@@ -4,7 +4,7 @@
 @section('description', $product->short_description ?? $product->description)
 
 @section('content')
-<div class="container-lg py-3">
+<div class="container-lg section-shell py-3">
     @php
         $mainImageUrl = \App\Helpers\ImageHelper::productImageUrl($product);
     @endphp

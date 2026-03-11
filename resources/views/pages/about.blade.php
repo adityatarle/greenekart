@@ -6,7 +6,7 @@
 <div class="about-page">
     <!-- Hero with icon -->
     <section class="about-hero">
-        <div class="container-lg">
+        <div class="container-lg section-shell">
             <div class="about-hero-inner">
                 <div class="about-hero-icon-wrap">
                     <i class="fas fa-leaf about-hero-icon" aria-hidden="true"></i>
@@ -24,7 +24,7 @@
 
     <!-- Vision card with icon -->
     <section class="about-section about-section--default">
-        <div class="container-lg">
+        <div class="container-lg section-shell">
             <div class="about-vision-card">
                 <div class="about-vision-header">
                     <div class="about-vision-icon-wrap">
@@ -46,7 +46,7 @@
 
     <!-- Mission - 4 cards with strong icons -->
     <section class="about-section about-section--alt">
-        <div class="container-lg">
+        <div class="container-lg section-shell">
             <div class="about-section-head text-center mb-4">
                 <div class="about-section-icon-wrap mx-auto mb-3">
                     <i class="fas fa-bullseye" aria-hidden="true"></i>
